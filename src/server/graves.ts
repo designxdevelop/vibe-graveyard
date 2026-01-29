@@ -70,6 +70,31 @@ export const getPendingGraves = createServerFn({ method: 'GET' })
       .orderBy(desc(graves.createdAt))
   })
 
+// Admin: Get all graves (including approved)
+export const getAllGraves = createServerFn({ method: 'GET' })
+  .inputValidator((password: string) => password)
+  .handler(async ({ data: password }) => {
+    if (password !== process.env.ADMIN_PASSWORD) {
+      throw new Error('Unauthorized')
+    }
+    return db
+      .select()
+      .from(graves)
+      .orderBy(desc(graves.createdAt))
+  })
+
+// Admin: Delete a grave
+export const deleteGrave = createServerFn({ method: 'POST' })
+  .inputValidator((data: { id: string; password: string }) => data)
+  .handler(async ({ data }) => {
+    if (data.password !== process.env.ADMIN_PASSWORD) {
+      throw new Error('Unauthorized')
+    }
+    
+    await db.delete(graves).where(eq(graves.id, data.id))
+    return { success: true }
+  })
+
 // Admin: Approve or reject a grave
 export const moderateGrave = createServerFn({ method: 'POST' })
   .inputValidator(

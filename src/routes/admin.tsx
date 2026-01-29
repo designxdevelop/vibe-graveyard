@@ -1,20 +1,24 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { getPendingGraves, moderateGrave, updateGrave } from '@/server/graves'
+import { getPendingGraves, getAllGraves, moderateGrave, updateGrave, deleteGrave } from '@/server/graves'
 import type { Grave } from '@/server/schema'
 
 export const Route = createFileRoute('/admin')({
   component: AdminPage,
 })
 
+type ViewMode = 'pending' | 'approved' | 'all'
+
 function AdminPage() {
   const [password, setPassword] = useState('')
   const [isAuthed, setIsAuthed] = useState(false)
-  const [pendingGraves, setPendingGraves] = useState<Grave[]>([])
+  const [allGraves, setAllGraves] = useState<Grave[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('pending')
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<{
     name: string
     url: string
@@ -32,8 +36,8 @@ function AdminPage() {
     setError(null)
 
     try {
-      const graves = await getPendingGraves({ data: password })
-      setPendingGraves(graves)
+      const graves = await getAllGraves({ data: password })
+      setAllGraves(graves)
       setIsAuthed(true)
     } catch (err) {
       setError('Invalid password or server error')
@@ -42,15 +46,34 @@ function AdminPage() {
     }
   }
 
+  const filteredGraves = allGraves.filter(g => {
+    if (viewMode === 'pending') return g.status === 'pending'
+    if (viewMode === 'approved') return g.status === 'approved'
+    return true
+  })
+
   const handleModerate = async (id: string, status: 'approved' | 'rejected') => {
     setActionLoading(id)
     try {
       await moderateGrave({ data: { id, status, password } })
-      setPendingGraves((prev) => prev.filter((g) => g.id !== id))
+      setAllGraves((prev) => prev.map(g => g.id === id ? { ...g, status } : g))
       setEditingId(null)
       setEditForm(null)
     } catch (err) {
       setError('Failed to moderate grave')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    setActionLoading(id)
+    try {
+      await deleteGrave({ data: { id, password } })
+      setAllGraves((prev) => prev.filter(g => g.id !== id))
+      setDeleteConfirm(null)
+    } catch (err) {
+      setError('Failed to delete grave')
     } finally {
       setActionLoading(null)
     }
@@ -104,7 +127,7 @@ function AdminPage() {
       })
       
       // Update local state
-      setPendingGraves((prev) =>
+      setAllGraves((prev) =>
         prev.map((g) =>
           g.id === id
             ? {
@@ -169,25 +192,61 @@ function AdminPage() {
     )
   }
 
+  const pendingCount = allGraves.filter(g => g.status === 'pending').length
+  const approvedCount = allGraves.filter(g => g.status === 'approved').length
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-xl glow-text mb-1">MODERATION QUEUE</h2>
+          <h2 className="text-xl glow-text mb-1">GRAVE MANAGEMENT</h2>
           <p className="readable-sm text-[var(--grave-green-dim)]">
-            {pendingGraves.length} submission
-            {pendingGraves.length !== 1 ? 's' : ''} awaiting judgment
+            {allGraves.length} total graves
           </p>
         </div>
         <button
           onClick={() => {
             setIsAuthed(false)
             setPassword('')
-            setPendingGraves([])
+            setAllGraves([])
           }}
           className="readable-sm text-[var(--grave-green-dim)] hover:text-[var(--grave-green)] transition-colors"
         >
           [LOGOUT]
+        </button>
+      </div>
+
+      {/* View mode tabs */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setViewMode('pending')}
+          className={`readable-sm px-4 py-2 transition-colors ${
+            viewMode === 'pending'
+              ? 'bg-[var(--grave-green)] text-[var(--grave-black)]'
+              : 'bg-[var(--grave-darker)] text-[var(--grave-green-dim)] hover:text-[var(--grave-green)]'
+          }`}
+        >
+          PENDING ({pendingCount})
+        </button>
+        <button
+          onClick={() => setViewMode('approved')}
+          className={`readable-sm px-4 py-2 transition-colors ${
+            viewMode === 'approved'
+              ? 'bg-[var(--grave-green)] text-[var(--grave-black)]'
+              : 'bg-[var(--grave-darker)] text-[var(--grave-green-dim)] hover:text-[var(--grave-green)]'
+          }`}
+        >
+          APPROVED ({approvedCount})
+        </button>
+        <button
+          onClick={() => setViewMode('all')}
+          className={`readable-sm px-4 py-2 transition-colors ${
+            viewMode === 'all'
+              ? 'bg-[var(--grave-green)] text-[var(--grave-black)]'
+              : 'bg-[var(--grave-darker)] text-[var(--grave-green-dim)] hover:text-[var(--grave-green)]'
+          }`}
+        >
+          ALL ({allGraves.length})
         </button>
       </div>
 
@@ -197,24 +256,56 @@ function AdminPage() {
         </div>
       )}
 
-      {pendingGraves.length === 0 ? (
+      {filteredGraves.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-lg glow-text-dim mb-4">NO PENDING SUBMISSIONS</p>
+          <p className="text-lg glow-text-dim mb-4">NO GRAVES FOUND</p>
           <p className="readable text-[var(--grave-green-dim)]">
-            All graves have been processed. Check back later.
+            {viewMode === 'pending' 
+              ? 'No pending submissions to review.'
+              : viewMode === 'approved'
+              ? 'No approved graves yet.'
+              : 'The graveyard is empty.'}
           </p>
         </div>
       ) : (
         <div className="space-y-6">
-          {pendingGraves.map((grave) => {
+          {filteredGraves.map((grave) => {
             const techStack = JSON.parse(grave.techStack) as string[]
             const isEditing = editingId === grave.id
+            const isDeleting = deleteConfirm === grave.id
             
             return (
               <div
                 key={grave.id}
-                className="pixel-border bg-[var(--grave-darker)] p-6"
+                className={`pixel-border bg-[var(--grave-darker)] p-6 ${
+                  grave.status === 'approved' ? 'border-[var(--grave-green)]' : 
+                  grave.status === 'rejected' ? 'border-[var(--grave-red)]' : ''
+                }`}
               >
+                {/* Delete confirmation */}
+                {isDeleting && (
+                  <div className="mb-4 p-4 bg-[var(--grave-red)] bg-opacity-20 border border-[var(--grave-red)]">
+                    <p className="readable-sm text-[var(--grave-red)] mb-4">
+                      Are you sure you want to permanently delete "{grave.name}"? This cannot be undone.
+                    </p>
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => handleDelete(grave.id)}
+                        disabled={actionLoading === grave.id}
+                        className="pixel-btn pixel-btn-danger readable-sm flex-1 disabled:opacity-50"
+                      >
+                        {actionLoading === grave.id ? 'DELETING...' : 'YES, DELETE'}
+                      </button>
+                      <button
+                        onClick={() => setDeleteConfirm(null)}
+                        className="pixel-btn readable-sm flex-1"
+                      >
+                        CANCEL
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {isEditing && editForm ? (
                   // Edit mode
                   <div className="space-y-4">
@@ -335,14 +426,19 @@ function AdminPage() {
                       >
                         {actionLoading === grave.id ? 'SAVING...' : 'SAVE CHANGES'}
                       </button>
-                      <button
-                        onClick={() => handleModerate(grave.id, 'approved')}
-                        disabled={actionLoading === grave.id}
-                        className="pixel-btn readable-sm flex-1 disabled:opacity-50"
-                        style={{ background: 'var(--grave-green)', color: 'var(--grave-black)' }}
-                      >
-                        SAVE & APPROVE
-                      </button>
+                      {grave.status === 'pending' && (
+                        <button
+                          onClick={async () => {
+                            await saveEdits(grave.id)
+                            await handleModerate(grave.id, 'approved')
+                          }}
+                          disabled={actionLoading === grave.id}
+                          className="pixel-btn readable-sm flex-1 disabled:opacity-50"
+                          style={{ background: 'var(--grave-green)', color: 'var(--grave-black)' }}
+                        >
+                          SAVE & APPROVE
+                        </button>
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -350,7 +446,18 @@ function AdminPage() {
                   <>
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 className="text-sm glow-text">{grave.name}</h3>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-sm glow-text">{grave.name}</h3>
+                          <span className={`readable-xs px-2 py-0.5 ${
+                            grave.status === 'approved' 
+                              ? 'bg-[var(--grave-green)] text-[var(--grave-black)]'
+                              : grave.status === 'rejected'
+                              ? 'bg-[var(--grave-red)] text-white'
+                              : 'bg-[var(--grave-purple)] text-white'
+                          }`}>
+                            {grave.status.toUpperCase()}
+                          </span>
+                        </div>
                         <a
                           href={grave.url}
                           target="_blank"
@@ -403,9 +510,7 @@ function AdminPage() {
                     <div className="flex gap-4 readable-sm mb-4">
                       {grave.starCount && (
                         <span>
-                          <span className="text-[var(--grave-green-dim)]">
-                            Stars:
-                          </span>{' '}
+                          <span className="text-[var(--grave-green-dim)]">Stars:</span>{' '}
                           {grave.starCount}
                         </span>
                       )}
@@ -413,6 +518,12 @@ function AdminPage() {
                         <span>
                           <span className="text-[var(--grave-green-dim)]">By:</span>{' '}
                           {grave.submittedBy}
+                        </span>
+                      )}
+                      {grave.respectCount > 0 && (
+                        <span>
+                          <span className="text-[var(--grave-green-dim)]">Respects:</span>{' '}
+                          {grave.respectCount}
                         </span>
                       )}
                     </div>
@@ -425,19 +536,30 @@ function AdminPage() {
                       >
                         EDIT
                       </button>
+                      {grave.status === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => handleModerate(grave.id, 'approved')}
+                            disabled={actionLoading === grave.id}
+                            className="pixel-btn readable-sm flex-1 disabled:opacity-50"
+                          >
+                            {actionLoading === grave.id ? '...' : 'APPROVE'}
+                          </button>
+                          <button
+                            onClick={() => handleModerate(grave.id, 'rejected')}
+                            disabled={actionLoading === grave.id}
+                            className="pixel-btn pixel-btn-danger readable-sm flex-1 disabled:opacity-50"
+                          >
+                            {actionLoading === grave.id ? '...' : 'REJECT'}
+                          </button>
+                        </>
+                      )}
                       <button
-                        onClick={() => handleModerate(grave.id, 'approved')}
+                        onClick={() => setDeleteConfirm(grave.id)}
                         disabled={actionLoading === grave.id}
-                        className="pixel-btn readable-sm flex-1 disabled:opacity-50"
+                        className="pixel-btn pixel-btn-danger readable-sm disabled:opacity-50"
                       >
-                        {actionLoading === grave.id ? '...' : 'APPROVE'}
-                      </button>
-                      <button
-                        onClick={() => handleModerate(grave.id, 'rejected')}
-                        disabled={actionLoading === grave.id}
-                        className="pixel-btn pixel-btn-danger readable-sm flex-1 disabled:opacity-50"
-                      >
-                        {actionLoading === grave.id ? '...' : 'REJECT'}
+                        DELETE
                       </button>
                     </div>
                   </>
