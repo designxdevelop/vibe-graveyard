@@ -89,6 +89,47 @@ export const moderateGrave = createServerFn({ method: 'POST' })
     return { success: true }
   })
 
+// Admin: Update a grave's details
+export const updateGrave = createServerFn({ method: 'POST' })
+  .inputValidator(
+    (data: {
+      id: string
+      password: string
+      updates: {
+        name?: string
+        url?: string
+        birthDate?: string
+        deathDate?: string
+        causeOfDeath?: string
+        epitaph?: string
+        techStack?: string[]
+        starCount?: number | null
+      }
+    }) => data
+  )
+  .handler(async ({ data }) => {
+    if (data.password !== process.env.ADMIN_PASSWORD) {
+      throw new Error('Unauthorized')
+    }
+
+    const updates: Record<string, unknown> = {}
+    if (data.updates.name) updates.name = data.updates.name
+    if (data.updates.url) updates.url = data.updates.url
+    if (data.updates.birthDate) updates.birthDate = data.updates.birthDate
+    if (data.updates.deathDate) updates.deathDate = data.updates.deathDate
+    if (data.updates.causeOfDeath) updates.causeOfDeath = data.updates.causeOfDeath
+    if (data.updates.epitaph) updates.epitaph = data.updates.epitaph
+    if (data.updates.techStack) updates.techStack = JSON.stringify(data.updates.techStack)
+    if (data.updates.starCount !== undefined) updates.starCount = data.updates.starCount
+
+    await db
+      .update(graves)
+      .set(updates)
+      .where(eq(graves.id, data.id))
+
+    return { success: true }
+  })
+
 // Helper to parse tech stack from stored JSON
 export function parseTechStack(grave: Grave): string[] {
   try {
