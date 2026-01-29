@@ -26,8 +26,16 @@ sqlite.exec(`
     epitaph TEXT NOT NULL,
     tech_stack TEXT NOT NULL,
     star_count INTEGER,
+    respect_count INTEGER NOT NULL DEFAULT 0,
     submitted_by TEXT,
     status TEXT NOT NULL DEFAULT 'pending',
     created_at TEXT NOT NULL
   )
 `)
+
+// Migration: Add respect_count column if it doesn't exist
+try {
+  sqlite.exec(`ALTER TABLE graves ADD COLUMN respect_count INTEGER NOT NULL DEFAULT 0`)
+} catch (e) {
+  // Column already exists, ignore error
+}
