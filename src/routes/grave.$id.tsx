@@ -50,7 +50,6 @@ function GraveDetailPage() {
     (deathDate.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24)
   )
 
-  // Create a modified grave object with current respect count for display
   const displayGrave = { ...grave, respectCount }
 
   const handlePayRespects = useCallback(async (clientX?: number, clientY?: number) => {
@@ -110,7 +109,7 @@ function GraveDetailPage() {
         </div>
       ))}
       
-      <div className="max-w-lg mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
         <Link
           to="/"
           className="readable-sm text-[var(--grave-green-dim)] hover:text-[var(--grave-green)] mb-6 inline-block transition-colors duration-150 ease"
@@ -118,101 +117,136 @@ function GraveDetailPage() {
           ← BACK TO GRAVEYARD
         </Link>
 
-        {/* Main gravestone using shared component */}
-        <div className="mb-6">
-          <GravestoneSVG grave={displayGrave} size="large" showRespects={false} />
-        </div>
+        {/* Two column layout */}
+        <div className="grid md:grid-cols-2 gap-8 items-start">
+          {/* Left column - Gravestone */}
+          <div className="max-w-sm mx-auto md:mx-0">
+            <GravestoneSVG grave={displayGrave} size="large" />
+          </div>
 
-        {/* Cause of death */}
-        <div className="text-center mb-6">
-          <div className="readable-sm text-[var(--grave-red)] uppercase tracking-wider">
-            CAUSE OF DEATH
-          </div>
-          <div className="readable text-[var(--grave-red)] mt-1">
-            {grave.causeOfDeath}
+          {/* Right column - Info & Actions */}
+          <div className="space-y-6">
+            {/* Project name (mobile hidden, shown in gravestone) */}
+            <div className="hidden md:block">
+              <h1 className="text-2xl glow-text mb-2">{grave.name}</h1>
+              <a 
+                href={grave.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="readable-sm text-[var(--grave-green-dim)] hover:text-[var(--grave-green)] break-all transition-colors"
+              >
+                {grave.url}
+              </a>
+            </div>
+
+            {/* Cause of death */}
+            <div className="pixel-border bg-[var(--grave-darker)] p-4">
+              <div className="readable-xs text-[var(--grave-green-dim)] uppercase tracking-wider mb-1">
+                CAUSE OF DEATH
+              </div>
+              <div className="readable text-[var(--grave-red)]">
+                {grave.causeOfDeath}
+              </div>
+            </div>
+
+            {/* Stats grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="pixel-border bg-[var(--grave-darker)] p-4 text-center">
+                <div className="text-2xl glow-text tabular-nums">{grave.starCount?.toLocaleString() || '?'}</div>
+                <div className="readable-xs text-[var(--grave-green-dim)]">GITHUB STARS</div>
+              </div>
+              <div className="pixel-border bg-[var(--grave-darker)] p-4 text-center">
+                <div className="text-2xl glow-text tabular-nums">{respectCount.toLocaleString()}</div>
+                <div className="readable-xs text-[var(--grave-green-dim)]">RESPECTS PAID</div>
+              </div>
+              <div className="pixel-border bg-[var(--grave-darker)] p-4 text-center">
+                <div className="text-2xl glow-text tabular-nums">{daysAlive.toLocaleString()}</div>
+                <div className="readable-xs text-[var(--grave-green-dim)]">DAYS ALIVE</div>
+              </div>
+              <div className="pixel-border bg-[var(--grave-darker)] p-4 text-center">
+                <div className="text-2xl glow-text tabular-nums">{daysDead.toLocaleString()}</div>
+                <div className="readable-xs text-[var(--grave-green-dim)]">DAYS DEAD</div>
+              </div>
+            </div>
+
+            {/* Tech stack */}
+            <div>
+              <div className="readable-xs text-[var(--grave-green-dim)] uppercase tracking-wider mb-2">
+                TECH STACK
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {techStack.map((tech) => (
+                  <span
+                    key={tech}
+                    className="readable-sm px-3 py-1 bg-[var(--grave-green)] text-[var(--grave-black)] font-bold"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="space-y-3">
+              <a
+                href={grave.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pixel-btn readable-sm text-center block"
+              >
+                VISIT REMAINS →
+              </a>
+              
+              <a
+                href={`https://twitter.com/intent/tweet?text=${shareText}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pixel-btn readable-sm text-center block"
+                style={{
+                  background: 'var(--grave-purple)',
+                  boxShadow: '4px 4px 0 0 #4b0082',
+                }}
+              >
+                SHARE ON X
+              </a>
+
+              <button
+                onClick={(e) => handlePayRespects(e.clientX, e.clientY)}
+                className={`
+                  pixel-btn readable-sm w-full flex items-center justify-center gap-3
+                  transition-transform duration-150 ease-out
+                  ${isPressed ? 'scale-95' : 'scale-100'}
+                `}
+                style={{ 
+                  touchAction: 'manipulation',
+                  background: 'var(--grave-green-dim)',
+                  boxShadow: '4px 4px 0 0 #002200',
+                }}
+              >
+                <kbd 
+                  className={`
+                    inline-flex items-center justify-center
+                    w-7 h-7 
+                    bg-[var(--grave-black)] text-[var(--grave-green)]
+                    font-bold border-2 border-[var(--grave-green)]
+                    transition-all duration-150 ease-out
+                    ${isPressed ? 'scale-90' : ''}
+                  `}
+                >
+                  F
+                </kbd>
+                PAY RESPECTS
+              </button>
+            </div>
+
+            {/* Submitted by */}
+            {grave.submittedBy && (
+              <p className="readable-xs text-[var(--grave-green-dim)]">
+                Submitted by: {grave.submittedBy}
+              </p>
+            )}
           </div>
         </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-2 text-center py-4 mb-6 border-t border-b border-[var(--grave-green-dim)]">
-          <div>
-            <div className="text-lg glow-text tabular-nums">{grave.starCount?.toLocaleString() || '?'}</div>
-            <div className="readable-xs text-[var(--grave-green-dim)]">STARS</div>
-          </div>
-          <div>
-            <div className="text-lg glow-text tabular-nums">{daysAlive.toLocaleString()}</div>
-            <div className="readable-xs text-[var(--grave-green-dim)]">DAYS ALIVE</div>
-          </div>
-          <div>
-            <div className="text-lg glow-text tabular-nums">{daysDead.toLocaleString()}</div>
-            <div className="readable-xs text-[var(--grave-green-dim)]">DAYS DEAD</div>
-          </div>
-          <div>
-            <div className="text-lg glow-text tabular-nums">{respectCount.toLocaleString()}</div>
-            <div className="readable-xs text-[var(--grave-green-dim)]">RESPECTS</div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
-          <a
-            href={grave.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pixel-btn readable-sm text-center"
-          >
-            VISIT REMAINS
-          </a>
-          <a
-            href={`https://twitter.com/intent/tweet?text=${shareText}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pixel-btn readable-sm text-center"
-            style={{
-              background: 'var(--grave-purple)',
-              boxShadow: '4px 4px 0 0 #4b0082',
-            }}
-          >
-            SHARE ON X
-          </a>
-        </div>
-
-        {/* Press F to pay respects */}
-        <div className="text-center">
-          <button
-            onClick={(e) => handlePayRespects(e.clientX, e.clientY)}
-            className={`
-              pixel-btn readable-sm inline-flex items-center gap-3
-              transition-transform duration-150 ease-out
-              ${isPressed ? 'scale-95' : 'scale-100'}
-            `}
-            style={{ touchAction: 'manipulation' }}
-          >
-            <kbd 
-              className={`
-                inline-flex items-center justify-center
-                w-7 h-7 
-                bg-[var(--grave-black)] text-[var(--grave-green)]
-                font-bold border-2 border-[var(--grave-green)]
-                transition-all duration-150 ease-out
-                ${isPressed ? 'scale-90' : ''}
-              `}
-            >
-              F
-            </kbd>
-            PAY RESPECTS
-          </button>
-          <p className="readable-xs text-[var(--grave-green-dim)] mt-2">
-            Press F or click to pay respects
-          </p>
-        </div>
-
-        {/* Submitted by */}
-        {grave.submittedBy && (
-          <p className="readable-xs text-[var(--grave-green-dim)] text-center mt-8">
-            Submitted by: {grave.submittedBy}
-          </p>
-        )}
       </div>
     </>
   )

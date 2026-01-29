@@ -205,20 +205,23 @@ export function GravestoneSVG({ grave, size = 'small', showRespects = true }: Gr
         </div>
       </div>
       
-      {/* Star count badge - top right */}
-      {grave.starCount && grave.starCount > 0 && (
-        <div className={`absolute ${isLarge ? 'top-[14%] right-[20%] text-sm' : 'top-[14%] right-[22%] text-[9px]'} opacity-70 flex items-center gap-1`}>
-          <span className="text-yellow-400">★</span>
-          <span className="tabular-nums">{grave.starCount.toLocaleString()}</span>
-        </div>
-      )}
-      
-      {/* Respect count badge - top left */}
-      {showRespects && grave.respectCount && grave.respectCount > 0 && (
-        <div className={`absolute ${isLarge ? 'top-[14%] left-[20%] text-sm' : 'top-[14%] left-[22%] text-[9px]'} opacity-70 tabular-nums`}>
-          {grave.respectCount.toLocaleString()} F
-        </div>
-      )}
+      {/* Badges at bottom of stone, above grass */}
+      <div className={`absolute ${isLarge ? 'bottom-[18%]' : 'bottom-[20%]'} left-0 right-0 flex justify-center gap-4`}>
+        {/* Star count */}
+        {grave.starCount && grave.starCount > 0 && (
+          <div className={`${isLarge ? 'text-sm' : 'text-[9px]'} opacity-70 flex items-center gap-1`}>
+            <span className="text-yellow-400">★</span>
+            <span className="tabular-nums">{grave.starCount.toLocaleString()}</span>
+          </div>
+        )}
+        
+        {/* Respect count */}
+        {showRespects && grave.respectCount && grave.respectCount > 0 && (
+          <div className={`${isLarge ? 'text-sm' : 'text-[9px]'} opacity-70 tabular-nums`}>
+            {grave.respectCount.toLocaleString()} F
+          </div>
+        )}
+      </div>
     </div>
   )
 }
