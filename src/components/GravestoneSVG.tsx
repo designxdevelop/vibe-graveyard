@@ -1,4 +1,4 @@
-import { Github, Star } from 'lucide-react'
+import { Star } from 'lucide-react'
 import type { Grave } from '@/server/schema'
 
 interface GravestoneSVGProps {
@@ -183,7 +183,7 @@ function SmallGravestone({ grave, isOld, isAncient, formatDate, showRespects }: 
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
-            textWrap: 'balance',
+            wordBreak: 'break-word',
           }}
         >
           "{grave.epitaph}"
@@ -201,7 +201,7 @@ function SmallGravestone({ grave, isOld, isAncient, formatDate, showRespects }: 
             gap: '14px',
           }}
         >
-          {grave.starCount && grave.starCount > 0 && (
+          {grave.starCount != null && (
             <div
               style={{
                 display: 'flex',
@@ -211,7 +211,7 @@ function SmallGravestone({ grave, isOld, isAncient, formatDate, showRespects }: 
                 opacity: 0.8,
               }}
             >
-              <Star size={13} fill="#00ff00" color="#00ff00" />
+              <Star size={13} fill="#00ff00" stroke="#00ff00" />
               <span className="tabular-nums">{grave.starCount.toLocaleString()}</span>
             </div>
           )}
@@ -403,7 +403,7 @@ function LargeGravestone({ grave, isOld, isAncient, formatDate, showRespects }: 
             gap: '20px',
           }}
         >
-          {grave.starCount && grave.starCount > 0 && (
+          {grave.starCount != null && (
             <div
               style={{
                 display: 'flex',
@@ -413,7 +413,7 @@ function LargeGravestone({ grave, isOld, isAncient, formatDate, showRespects }: 
                 opacity: 0.75,
               }}
             >
-              <Github size={14} color="#00ff00" />
+              <Star size={14} fill="#00ff00" stroke="#00ff00" />
               <span className="tabular-nums">{grave.starCount.toLocaleString()}</span>
               <span style={{ opacity: 0.6 }}>STARS</span>
             </div>
