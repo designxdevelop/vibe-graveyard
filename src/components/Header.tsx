@@ -28,13 +28,6 @@ export function Header() {
           >
             [SUBMIT]
           </Link>
-          <Link 
-            to="/admin" 
-            className="hover:text-[var(--grave-green)] transition-colors opacity-50 hover:opacity-100"
-            activeProps={{ className: 'glow-text opacity-100' }}
-          >
-            [ADMIN]
-          </Link>
         </div>
       </nav>
     </header>
