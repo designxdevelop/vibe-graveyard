@@ -450,4 +450,11 @@ body {
   .pixel-textarea {
     font-size: 16px;
   }
+
+  /* Smaller gravestones on mobile portrait */
+  .gravestone-card {
+    aspect-ratio: 5 / 6 !important;
+    max-width: 280px;
+    margin: 0 auto;
+  }
 }
