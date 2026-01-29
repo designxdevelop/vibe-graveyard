@@ -254,3 +254,162 @@ body {
   background: var(--grave-green);
   animation: twinkle 2s ease-in-out infinite;
 }
+
+/* ============================================
+   Emil Design Engineering Animations
+   ============================================ */
+
+/* Easing variables (ease-out for enter/exit) */
+:root {
+  --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+/* Press F floating animation */
+@keyframes float-up-fade {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% - 60px)) scale(1.5);
+  }
+}
+
+.press-f-float {
+  animation: float-up-fade 1s var(--ease-out-quart) forwards;
+}
+
+/* Press F button hover - only on devices that support hover */
+@media (hover: hover) and (pointer: fine) {
+  .press-f-btn:hover {
+    border-color: var(--grave-green);
+    box-shadow: 0 0 15px var(--grave-green-glow);
+  }
+}
+
+/* Improved gravestone entrance */
+@keyframes gravestone-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.gravestone-enter {
+  animation: gravestone-rise 0.4s var(--ease-out-quart) forwards;
+  animation-fill-mode: both;
+}
+
+/* Subtle hover effect - only with proper hover support */
+@media (hover: hover) and (pointer: fine) {
+  .ghost-float {
+    transition: transform 0.2s var(--ease-out-cubic);
+  }
+  
+  .ghost-float:hover {
+    transform: translateY(-4px);
+  }
+  
+  .ghost-float:hover .gravestone-body {
+    box-shadow: 0 0 20px var(--grave-green-glow);
+  }
+}
+
+.gravestone-body {
+  transition: box-shadow 0.2s var(--ease-out-cubic);
+}
+
+/* Remove animation for keyboard-only navigation */
+.ghost-float:focus-visible {
+  transform: none;
+  outline: 2px solid var(--grave-green);
+  outline-offset: 2px;
+}
+
+/* Page transition fade */
+@keyframes page-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: page-fade-in 0.3s var(--ease-out-cubic) forwards;
+}
+
+/* Button press feedback */
+.pixel-btn {
+  transition: transform 0.1s var(--ease-out-quad), 
+              box-shadow 0.1s var(--ease-out-quad);
+  touch-action: manipulation;
+}
+
+.pixel-btn:active {
+  transform: translate(4px, 4px) scale(0.98);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .gravestone-enter,
+  .press-f-float,
+  .page-enter {
+    animation: none;
+  }
+  
+  .ghost-float,
+  .ghost-float:hover {
+    animation: none;
+    transform: none;
+    transition: none;
+  }
+  
+  .flicker {
+    animation: none;
+  }
+  
+  .star {
+    animation: none;
+    opacity: 0.6;
+  }
+  
+  .pixel-btn {
+    transition: none;
+  }
+  
+  .pixel-btn:hover,
+  .pixel-btn:active {
+    transform: none;
+  }
+}
+
+/* Tabular nums for counters (no layout shift) */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--grave-green);
+  outline-offset: 2px;
+}
+
+/* Ensure minimum tap targets on touch */
+@media (pointer: coarse) {
+  button, a, input, select, textarea {
+    min-height: 44px;
+  }
+}

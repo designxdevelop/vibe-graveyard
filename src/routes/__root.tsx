@@ -3,6 +3,7 @@ import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-r
 import { Header } from '@/components/Header'
 import { GraveyardBackground } from '@/components/GraveyardBackground'
 import { CRTOverlay } from '@/components/CRTOverlay'
+import { PressF } from '@/components/PressF'
 
 import appCss from '../styles.css?url'
 
@@ -47,6 +48,7 @@ function RootComponent() {
       <body className="min-h-screen">
         <GraveyardBackground />
         <CRTOverlay />
+        <PressF />
         <div className="relative z-10">
           <Header />
           <main>

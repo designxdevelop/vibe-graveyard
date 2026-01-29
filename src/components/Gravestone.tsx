@@ -22,18 +22,17 @@ export function Gravestone({ grave, index = 0 }: GravestoneProps) {
     <Link
       to="/grave/$id"
       params={{ id: grave.id }}
-      className="block group"
-      style={{ animationDelay: `${index * 100}ms` }}
+      className="block ghost-float focus-visible:outline-none"
+      style={{ animationDelay: `${index * 80}ms` }}
     >
-      <div className="gravestone-enter ghost-float relative">
+      <div className="gravestone-enter relative">
         {/* Gravestone shape */}
         <div 
           className={`
+            gravestone-body
             relative px-4 py-6 min-h-[200px] flex flex-col items-center justify-center text-center
             ${isAncient ? 'pixel-border-stone opacity-70' : 'pixel-border'}
             bg-[var(--grave-darker)]
-            transition-all duration-200
-            group-hover:shadow-[0_0_20px_var(--grave-green-glow)]
           `}
           style={{
             clipPath: 'polygon(10% 0, 90% 0, 100% 10%, 100% 100%, 0 100%, 0 10%)',
@@ -48,7 +47,7 @@ export function Gravestone({ grave, index = 0 }: GravestoneProps) {
           )}
           
           {/* RIP header */}
-          <div className="text-[10px] tracking-widest mb-2 opacity-60">R.I.P.</div>
+          <div className="readable-sm tracking-widest mb-2 opacity-60">R.I.P.</div>
           
           {/* Project name */}
           <h3 className="text-sm glow-text mb-3 leading-tight break-words max-w-full">
@@ -56,14 +55,14 @@ export function Gravestone({ grave, index = 0 }: GravestoneProps) {
           </h3>
           
           {/* Dates */}
-          <div className="text-[8px] opacity-70 mb-3">
+          <div className="readable-xs opacity-70 mb-3">
             <span>{grave.birthDate}</span>
             <span className="mx-2">-</span>
             <span>{grave.deathDate}</span>
           </div>
           
           {/* Epitaph preview */}
-          <p className="text-[8px] italic opacity-60 line-clamp-2 mb-3">
+          <p className="readable-xs italic opacity-60 line-clamp-2 mb-3">
             "{grave.epitaph}"
           </p>
           
@@ -72,22 +71,22 @@ export function Gravestone({ grave, index = 0 }: GravestoneProps) {
             {techStack.slice(0, 3).map((tech) => (
               <span
                 key={tech}
-                className="text-[6px] px-2 py-1 bg-[var(--grave-green-dim)] text-[var(--grave-green)]"
+                className="readable-xs px-2 py-1 bg-[var(--grave-green-dim)] text-[var(--grave-green)]"
               >
                 {tech}
               </span>
             ))}
             {techStack.length > 3 && (
-              <span className="text-[6px] px-2 py-1 opacity-50">
+              <span className="readable-xs px-2 py-1 opacity-50">
                 +{techStack.length - 3}
               </span>
-            )}
+            ))}
           </div>
           
           {/* Star count */}
           {grave.starCount && grave.starCount > 0 && (
-            <div className="absolute top-2 right-2 text-[8px] opacity-60">
-              {grave.starCount}
+            <div className="absolute top-2 right-2 readable-xs opacity-60 tabular-nums">
+              {grave.starCount.toLocaleString()}
             </div>
           )}
         </div>
