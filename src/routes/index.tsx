@@ -1,17 +1,20 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { getGraves, getGlobalRespects } from '@/server/graves'
 import { Gravestone } from '@/components/Gravestone'
 import { useHomeRespects } from '@/components/HomeRespectsContext'
+import type { Grave } from '@/server/schema'
+
+const GRAVES_PER_PAGE = 6
 
 export const Route = createFileRoute('/')({
   component: HomePage,
   loader: async () => {
-    const [graves, globalRespects] = await Promise.all([
-      getGraves(),
+    const [gravesData, globalRespects] = await Promise.all([
+      getGraves({ data: { limit: GRAVES_PER_PAGE, offset: 0 } }),
       getGlobalRespects(),
     ])
-    return { graves, globalRespects }
+    return { gravesData, globalRespects }
   },
 })
 
@@ -57,14 +60,20 @@ function useCountUp(value: number, durationMs = 700) {
 }
 
 function HomePage() {
-  const { graves, globalRespects } = Route.useLoaderData()
-  const testsWritten = useMemo(() => getRandomTestsWritten(graves.length), [graves.length])
+  const { gravesData, globalRespects } = Route.useLoaderData()
+
+  // State for paginated graves
+  const [graves, setGraves] = useState<Grave[]>(gravesData.graves)
+  const [hasMore, setHasMore] = useState(gravesData.hasMore)
+  const [total, setTotal] = useState(gravesData.total)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const testsWritten = useMemo(() => getRandomTestsWritten(total), [total])
   const homeRespects = useHomeRespects()
   const setTotalRespects = homeRespects?.setTotalRespects
-  const totalGraves = graves.length
   const totalStars = graves.reduce((acc, g) => acc + (g.starCount || 0), 0)
 
-  const totalGravesDisplay = useCountUp(totalGraves)
+  const totalGravesDisplay = useCountUp(total)
   const totalStarsDisplay = useCountUp(totalStars)
   const testsWrittenDisplay = useCountUp(testsWritten)
 
@@ -73,6 +82,24 @@ function HomePage() {
     setTotalRespects(globalRespects)
     return () => setTotalRespects(null)
   }, [setTotalRespects, globalRespects])
+
+  const loadMore = useCallback(async () => {
+    if (isLoading || !hasMore) return
+
+    setIsLoading(true)
+    try {
+      const result = await getGraves({
+        data: { limit: GRAVES_PER_PAGE, offset: graves.length }
+      })
+      setGraves(prev => [...prev, ...result.graves])
+      setHasMore(result.hasMore)
+      setTotal(result.total)
+    } catch (error) {
+      console.error('Failed to load more graves:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [graves.length, hasMore, isLoading])
 
   return (
     <div className="mx-auto px-6 sm:px-10 py-6 sm:py-10" style={{ maxWidth: '75rem' }}>
@@ -86,14 +113,14 @@ function HomePage() {
           then quietly abandoned. Here lie the dreams of weekend hackathons
           and "I'll maintain this later" promises.
         </p>
-        
+
         <Link to="/submit" className="pixel-btn inline-block mt-6 text-[10px]">
           SUBMIT A PROJECT
         </Link>
       </div>
 
       {/* Graveyard grid */}
-      {graves.length === 0 ? (
+      {total === 0 ? (
         <div className="text-center py-20">
           <p className="text-base sm:text-lg glow-text-dim mb-4">THE GRAVEYARD IS EMPTY</p>
           <p className="readable text-[var(--grave-green-dim)]">
@@ -103,14 +130,31 @@ function HomePage() {
       ) : (
         <>
           <div className="readable-sm text-[var(--grave-green-dim)] mb-4 text-center">
-            {graves.length} PROJECT{graves.length !== 1 ? 'S' : ''} INTERRED
+            {total} PROJECT{total !== 1 ? 'S' : ''} INTERRED
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-10 lg:gap-y-12 lg:gap-x-16">
             {graves.map((grave, index) => (
               <Gravestone key={grave.id} grave={grave} index={index} />
             ))}
           </div>
+
+          {/* Load more button */}
+          {hasMore && (
+            <div className="text-center mt-12">
+              <button
+                onClick={loadMore}
+                disabled={isLoading}
+                className="pixel-btn text-[10px] disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: 'var(--grave-green-dim)',
+                  boxShadow: '4px 4px 0 0 #001a00',
+                }}
+              >
+                {isLoading ? 'EXHUMING...' : 'EXHUME MORE GRAVES'}
+              </button>
+            </div>
+          )}
         </>
       )}
 

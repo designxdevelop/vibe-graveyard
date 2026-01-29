@@ -4,14 +4,33 @@ import { nanoid } from 'nanoid'
 import { db } from './db'
 import { graves, globalStats, type Grave, type NewGrave } from './schema'
 
-// Get all approved graves
-export const getGraves = createServerFn({ method: 'GET' }).handler(async () => {
-  return db
-    .select()
-    .from(graves)
-    .where(eq(graves.status, 'approved'))
-    .orderBy(desc(graves.createdAt))
-})
+// Get approved graves with pagination
+export const getGraves = createServerFn({ method: 'GET' })
+  .inputValidator((data?: { limit?: number; offset?: number }) => data || {})
+  .handler(async ({ data }) => {
+    const limit = data?.limit ?? 6
+    const offset = data?.offset ?? 0
+
+    // Get total count
+    const countResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(graves)
+      .where(eq(graves.status, 'approved'))
+    const total = Number(countResult[0]?.count ?? 0)
+
+    // Get paginated results
+    const results = await db
+      .select()
+      .from(graves)
+      .where(eq(graves.status, 'approved'))
+      .orderBy(desc(graves.createdAt))
+      .limit(limit)
+      .offset(offset)
+
+    const hasMore = offset + results.length < total
+
+    return { graves: results, hasMore, total }
+  })
 
 export const getGlobalRespects = createServerFn({ method: 'GET' }).handler(async () => {
   await db
