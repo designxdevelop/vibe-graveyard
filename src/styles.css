@@ -26,6 +26,10 @@
   image-rendering: pixelated;
 }
 
+html {
+  overflow-y: scroll;
+}
+
 body {
   @apply m-0 bg-[var(--grave-black)] text-[var(--grave-green)];
   font-family: 'PressStart2P', 'Courier New', monospace;
