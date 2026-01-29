@@ -12,27 +12,45 @@ interface Ghost {
   fadeState: 'in' | 'visible' | 'out'
 }
 
+// Check if mobile (client-side only)
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+  
+  return isMobile
+}
+
 export function GraveyardBackground() {
   const [stars, setStars] = useState<{ x: number; y: number; delay: number; size: number }[]>([])
   const [ghosts, setGhosts] = useState<Ghost[]>([])
   const ghostIdRef = useRef(0)
-  const animationRef = useRef<number>()
+  const animationRef = useRef<number | undefined>(undefined)
+  const isMobile = useIsMobile()
 
   const getRandomPosition = useCallback(() => ({
     x: 5 + Math.random() * 90,
     y: 8 + Math.random() * 65,
   }), [])
 
-  const createGhost = useCallback((): Ghost => {
+  const createGhost = useCallback((mobile: boolean): Ghost => {
     const start = getRandomPosition()
     const target = getRandomPosition()
+    // Smaller ghosts on mobile
+    const baseSize = mobile ? 20 : 28
+    const sizeRange = mobile ? 16 : 28
     return {
       id: ghostIdRef.current++,
       x: start.x,
       y: start.y,
       targetX: target.x,
       targetY: target.y,
-      size: 28 + Math.random() * 28,
+      size: baseSize + Math.random() * sizeRange,
       speed: 0.0004 + Math.random() * 0.0006, // Very slow, dreamy drift
       opacity: 0,
       fadeState: 'in' as const,
@@ -40,8 +58,9 @@ export function GraveyardBackground() {
   }, [getRandomPosition])
 
   useEffect(() => {
-    // Generate random stars with varying sizes
-    const newStars = Array.from({ length: 100 }, () => ({
+    // Generate random stars with varying sizes (fewer on mobile)
+    const starCount = isMobile ? 50 : 100
+    const newStars = Array.from({ length: starCount }, () => ({
       x: Math.random() * 100,
       y: Math.random() * 55,
       delay: Math.random() * 5,
@@ -49,15 +68,17 @@ export function GraveyardBackground() {
     }))
     setStars(newStars)
 
-    // Initialize with ghosts spread across the screen
-    const initialGhosts = Array.from({ length: 6 }, () => {
-      const ghost = createGhost()
-      ghost.opacity = 0.3 + Math.random() * 0.4
+    // Initialize with fewer, more subtle ghosts on mobile
+    const ghostCount = isMobile ? 3 : 6
+    const maxOpacity = isMobile ? 0.25 : 0.4
+    const initialGhosts = Array.from({ length: ghostCount }, () => {
+      const ghost = createGhost(isMobile)
+      ghost.opacity = 0.15 + Math.random() * maxOpacity
       ghost.fadeState = 'visible'
       return ghost
     })
     setGhosts(initialGhosts)
-  }, [createGhost])
+  }, [createGhost, isMobile])
 
   // Main animation loop - ghosts float toward targets
   useEffect(() => {
@@ -89,10 +110,11 @@ export function GraveyardBackground() {
             targetY = newTarget.y
           }
 
-          // Handle fading (slower)
+          // Handle fading (slower, lower max on mobile)
+          const maxOpacity = 0.35
           if (fadeState === 'in') {
-            opacity = Math.min(opacity + 0.003 * (deltaTime / 16), 0.6)
-            if (opacity >= 0.6) {
+            opacity = Math.min(opacity + 0.003 * (deltaTime / 16), maxOpacity)
+            if (opacity >= maxOpacity) {
               fadeState = 'visible'
             }
           } else if (fadeState === 'out') {
@@ -119,23 +141,26 @@ export function GraveyardBackground() {
 
   // Spawn/despawn ghosts periodically
   useEffect(() => {
+    const maxGhosts = isMobile ? 4 : 8
     const spawnInterval = setInterval(() => {
       setGhosts(prev => {
         let updated = [...prev]
 
-        // Randomly fade out a visible ghost
+        // Randomly fade out a visible ghost (more aggressive on mobile)
         const visibleGhosts = updated.filter(g => g.fadeState === 'visible')
-        if (visibleGhosts.length > 3 && Math.random() < 0.3) {
+        const minGhosts = isMobile ? 2 : 3
+        if (visibleGhosts.length > minGhosts && Math.random() < 0.3) {
           const ghostToFade = visibleGhosts[Math.floor(Math.random() * visibleGhosts.length)]
           updated = updated.map(g =>
             g.id === ghostToFade.id ? { ...g, fadeState: 'out' as const } : g
           )
         }
 
-        // Spawn new ghost if we have room
+        // Spawn new ghost if we have room (less frequent on mobile)
         const activeGhosts = updated.filter(g => g.fadeState !== 'out' || g.opacity > 0)
-        if (activeGhosts.length < 8 && Math.random() < 0.5) {
-          updated.push(createGhost())
+        const spawnChance = isMobile ? 0.3 : 0.5
+        if (activeGhosts.length < maxGhosts && Math.random() < spawnChance) {
+          updated.push(createGhost(isMobile))
         }
 
         return updated
@@ -143,7 +168,7 @@ export function GraveyardBackground() {
     }, 8000) // Slower spawn/despawn cycle
 
     return () => clearInterval(spawnInterval)
-  }, [createGhost])
+  }, [createGhost, isMobile])
 
   return (
     <div
@@ -199,6 +224,7 @@ export function GraveyardBackground() {
       {ghosts.map((ghost) => (
         <div
           key={`ghost-${ghost.id}`}
+          className="bg-ghost-sprite"
           style={{
             position: 'absolute',
             left: `${ghost.x}%`,
@@ -206,7 +232,7 @@ export function GraveyardBackground() {
             width: `${ghost.size}px`,
             height: `${ghost.size}px`,
             opacity: ghost.opacity,
-            filter: `drop-shadow(0 0 ${8 + ghost.size * 0.2}px rgba(0, 255, 0, 0.4))`,
+            filter: `drop-shadow(0 0 ${4 + ghost.size * 0.1}px rgba(0, 255, 0, 0.2))`,
             transform: 'translate(-50%, -50%)',
             transition: 'opacity 0.3s ease-out',
           }}

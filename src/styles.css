@@ -457,6 +457,12 @@ body {
     max-width: 280px;
     margin: 0 auto;
   }
+  
+  /* Reduce background ghost visibility on mobile */
+  .bg-ghost-sprite {
+    opacity: 0.15 !important;
+    filter: drop-shadow(0 0 2px rgba(0, 255, 0, 0.1)) !important;
+  }
 }
 
 /* ============================================
