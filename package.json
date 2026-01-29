@@ -1,0 +1,41 @@
+{
+  "name": "vibe-graveyard",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --port 3000",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node .output/server/index.mjs",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.0.6",
+    "@tanstack/react-router": "^1.157.16",
+    "@tanstack/react-router-devtools": "^1.157.16",
+    "@tanstack/react-start": "^1.157.16",
+    "@tanstack/router-plugin": "^1.157.16",
+    "better-sqlite3": "^12.6.2",
+    "drizzle-orm": "^0.45.1",
+    "lucide-react": "^0.561.0",
+    "nanoid": "^5.1.6",
+    "nitro": "npm:nitro-nightly@latest",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tailwindcss": "^4.0.6",
+    "vite-tsconfig-paths": "^6.0.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tanstack/devtools-vite": "^0.3.11",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "drizzle-kit": "^0.31.8",
+    "typescript": "^5.7.2",
+    "vite": "^7.1.7"
+  }
+}

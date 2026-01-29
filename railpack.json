@@ -1,0 +1,15 @@
+{
+  "$schema": "https://railpack.com/schema.json",
+  "steps": {
+    "build": {
+      "commands": [
+        "rm -rf node_modules/.vite node_modules/.cache || true",
+        "npm ci",
+        "npm run build"
+      ]
+    }
+  },
+  "deploy": {
+    "startCommand": "npm run start"
+  }
+}

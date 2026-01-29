@@ -1,0 +1,6 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow: /admin
+
+# Let the dead rest... but let search engines find them
+Sitemap: /sitemap.xml

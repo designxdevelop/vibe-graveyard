@@ -1,0 +1,22 @@
+node_modules
+.DS_Store
+dist
+dist-ssr
+*.local
+count.txt
+.env
+.nitro
+.tanstack
+.wrangler
+.output
+.vinxi
+todos.json
+
+# SQLite database (local development)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Drizzle
+drizzle/
