@@ -46,6 +46,15 @@ sqlite.exec(`
   VALUES ('global', 0, datetime('now'))
 `)
 
+sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS ghost_hunter_scores (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    score INTEGER NOT NULL,
+    created_at TEXT NOT NULL
+  )
+`)
+
 // Migration: Add respect_count column if it doesn't exist
 try {
   sqlite.exec(`ALTER TABLE graves ADD COLUMN respect_count INTEGER NOT NULL DEFAULT 0`)

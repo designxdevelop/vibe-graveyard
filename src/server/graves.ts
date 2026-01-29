@@ -2,7 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { eq, desc, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { db } from './db'
-import { graves, globalStats, type Grave, type NewGrave } from './schema'
+import { graves, globalStats, ghostHunterScores, type Grave, type NewGrave } from './schema'
 
 // Get approved graves with pagination
 export const getGraves = createServerFn({ method: 'GET' })
@@ -266,4 +266,92 @@ export const fetchGitHubStars = createServerFn({ method: 'POST' })
     } catch (err) {
       return { stars: null, error: 'Failed to connect to GitHub' }
     }
+  })
+
+// Ghost Hunter Leaderboard
+const MAX_LEADERBOARD_ENTRIES = 10
+
+export const getGhostHunterLeaderboard = createServerFn({ method: 'GET' })
+  .handler(async () => {
+    const results = await db
+      .select()
+      .from(ghostHunterScores)
+      .orderBy(desc(ghostHunterScores.score))
+      .limit(MAX_LEADERBOARD_ENTRIES)
+    
+    return results
+  })
+
+export const submitGhostHunterScore = createServerFn({ method: 'POST' })
+  .inputValidator((data: { name: string; score: number }) => data)
+  .handler(async ({ data }) => {
+    // Validate name (1-10 chars, alphanumeric)
+    const name = data.name.trim().toUpperCase().slice(0, 10)
+    if (!name || !/^[A-Z0-9]+$/.test(name)) {
+      throw new Error('Invalid name')
+    }
+    
+    // Validate score (positive integer, reasonable max)
+    if (!Number.isInteger(data.score) || data.score < 0 || data.score > 99999) {
+      throw new Error('Invalid score')
+    }
+
+    // Check if this score qualifies for leaderboard
+    const currentScores = await db
+      .select()
+      .from(ghostHunterScores)
+      .orderBy(desc(ghostHunterScores.score))
+      .limit(MAX_LEADERBOARD_ENTRIES)
+    
+    const qualifies = currentScores.length < MAX_LEADERBOARD_ENTRIES || 
+      data.score > (currentScores[currentScores.length - 1]?.score ?? 0)
+    
+    if (!qualifies) {
+      return { success: false, message: 'Score does not qualify for leaderboard' }
+    }
+
+    // Insert new score
+    await db.insert(ghostHunterScores).values({
+      id: nanoid(),
+      name,
+      score: data.score,
+      createdAt: new Date().toISOString(),
+    })
+
+    // If we have more than max entries, delete the lowest
+    if (currentScores.length >= MAX_LEADERBOARD_ENTRIES) {
+      const allScores = await db
+        .select()
+        .from(ghostHunterScores)
+        .orderBy(desc(ghostHunterScores.score))
+      
+      const toDelete = allScores.slice(MAX_LEADERBOARD_ENTRIES)
+      for (const score of toDelete) {
+        await db.delete(ghostHunterScores).where(eq(ghostHunterScores.id, score.id))
+      }
+    }
+
+    // Return updated leaderboard
+    const leaderboard = await db
+      .select()
+      .from(ghostHunterScores)
+      .orderBy(desc(ghostHunterScores.score))
+      .limit(MAX_LEADERBOARD_ENTRIES)
+    
+    return { success: true, leaderboard }
+  })
+
+export const checkGhostHunterHighScore = createServerFn({ method: 'GET' })
+  .inputValidator((score: number) => score)
+  .handler(async ({ data: score }) => {
+    const currentScores = await db
+      .select()
+      .from(ghostHunterScores)
+      .orderBy(desc(ghostHunterScores.score))
+      .limit(MAX_LEADERBOARD_ENTRIES)
+    
+    const qualifies = currentScores.length < MAX_LEADERBOARD_ENTRIES || 
+      score > (currentScores[currentScores.length - 1]?.score ?? 0)
+    
+    return { qualifies, minScore: currentScores[currentScores.length - 1]?.score ?? 0 }
   })

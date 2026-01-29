@@ -24,6 +24,14 @@ export const globalStats = sqliteTable('global_stats', {
   updatedAt: text('updated_at').notNull(),
 })
 
+export const ghostHunterScores = sqliteTable('ghost_hunter_scores', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  score: integer('score').notNull(),
+  createdAt: text('created_at').notNull(),
+})
+
 export type Grave = typeof graves.$inferSelect
 export type NewGrave = typeof graves.$inferInsert
 export type GlobalStats = typeof globalStats.$inferSelect
+export type GhostHunterScore = typeof ghostHunterScores.$inferSelect

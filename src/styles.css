@@ -458,3 +458,436 @@ body {
     margin: 0 auto;
   }
 }
+
+/* ============================================
+   Ghost Hunter Game
+   ============================================ */
+
+.ghost-hunter-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.ghost-hunter-container {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  background: var(--grave-darker);
+  border: 4px solid var(--grave-green);
+  box-shadow: 
+    0 0 30px var(--grave-green-glow),
+    inset 0 0 20px rgba(0, 255, 0, 0.05);
+}
+
+.ghost-hunter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid var(--grave-green-dim);
+  background: rgba(0, 68, 0, 0.3);
+}
+
+.ghost-hunter-title {
+  font-size: 12px;
+  color: var(--grave-green);
+  text-shadow: 0 0 10px var(--grave-green);
+}
+
+.ghost-hunter-score,
+.ghost-hunter-time {
+  font-size: 10px;
+  color: var(--grave-green);
+}
+
+.ghost-hunter-arena {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  background: 
+    radial-gradient(circle at 50% 100%, rgba(0, 50, 0, 0.3) 0%, transparent 70%),
+    linear-gradient(180deg, #000000 0%, #030806 50%, #061008 100%);
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.ghost-hunter-ghost {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  animation: ghost-hunt-appear 0.2s var(--ease-out-quart);
+  transition: transform 0.1s ease-out;
+}
+
+.ghost-hunter-ghost:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.ghost-hunter-ghost:active {
+  transform: translate(-50%, -50%) scale(0.9);
+}
+
+.ghost-hunter-ghost-svg {
+  width: 100%;
+  height: 100%;
+  color: var(--grave-green);
+  filter: drop-shadow(0 0 8px var(--grave-green-glow));
+  animation: ghost-hunt-float 1s ease-in-out infinite;
+}
+
+@keyframes ghost-hunt-appear {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes ghost-hunt-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.ghost-hunter-waiting {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--grave-green-dim);
+  font-size: 14px;
+}
+
+.ghost-hunter-gameover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.ghost-hunter-gameover h2 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.ghost-hunter-final-score {
+  color: var(--grave-green);
+}
+
+.ghost-hunter-final-score p {
+  margin: 0;
+  font-size: 10px;
+}
+
+.ghost-hunter-big-score {
+  font-size: 32px !important;
+  text-shadow: 0 0 20px var(--grave-green);
+  margin-top: 0.5rem !important;
+}
+
+.ghost-hunter-new-high {
+  color: var(--grave-green);
+  font-size: 12px;
+  animation: flicker 0.5s infinite;
+  margin: 0;
+}
+
+.ghost-hunter-high-score {
+  color: var(--grave-green-dim);
+  font-size: 9px;
+  margin: 0;
+}
+
+.ghost-hunter-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ghost-hunter-buttons .pixel-btn {
+  font-size: 10px;
+  padding: 0.75rem 1.5rem;
+}
+
+.ghost-hunter-quit {
+  background: var(--grave-green-dim) !important;
+}
+
+.ghost-hunter-instructions {
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 8px;
+  color: var(--grave-green-dim);
+  border-top: 2px solid var(--grave-green-dim);
+}
+
+.ghost-hunter-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 2px solid var(--grave-green-dim);
+  color: var(--grave-green-dim);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+}
+
+.ghost-hunter-close:hover {
+  border-color: var(--grave-green);
+  color: var(--grave-green);
+}
+
+/* Insert coin button in footer */
+.insert-coin-btn {
+  background: none;
+  border: none;
+  color: var(--grave-green);
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.insert-coin-btn::before {
+  content: '>';
+  position: absolute;
+  left: -0.75rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.insert-coin-btn::after {
+  content: '<';
+  position: absolute;
+  right: -0.75rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.insert-coin-btn:hover {
+  text-shadow: 0 0 10px var(--grave-green);
+}
+
+.insert-coin-btn:hover::before,
+.insert-coin-btn:hover::after {
+  opacity: 1;
+}
+
+/* Graveyard Keeper (enemy) */
+.ghost-hunter-keeper {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 55px;
+  height: 70px;
+  animation: ghost-hunt-appear 0.2s var(--ease-out-quart), keeper-shake 0.3s ease-in-out infinite;
+  transition: transform 0.1s ease-out;
+}
+
+.ghost-hunter-keeper:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.ghost-hunter-keeper:active {
+  transform: translate(-50%, -50%) scale(0.9);
+}
+
+.ghost-hunter-keeper-svg {
+  width: 100%;
+  height: 100%;
+  color: var(--grave-red);
+  filter: drop-shadow(0 0 8px rgba(255, 0, 64, 0.6));
+}
+
+@keyframes keeper-shake {
+  0%, 100% { transform: translate(-50%, -50%) rotate(-2deg); }
+  50% { transform: translate(-50%, -50%) rotate(2deg); }
+}
+
+/* Lives display */
+.ghost-hunter-lives {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 14px;
+}
+
+.ghost-hunter-life {
+  color: var(--grave-red);
+  text-shadow: 0 0 8px rgba(255, 0, 64, 0.6);
+}
+
+.ghost-hunter-life-lost {
+  color: var(--grave-green-dim);
+  text-shadow: none;
+  opacity: 0.5;
+}
+
+/* Flash red when hit */
+.ghost-hunter-flash {
+  animation: arena-flash 0.2s ease-out;
+}
+
+@keyframes arena-flash {
+  0% { background-color: rgba(255, 0, 64, 0.3); }
+  100% { background-color: transparent; }
+}
+
+/* Name entry form */
+.ghost-hunter-name-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ghost-hunter-enter-name {
+  color: var(--grave-green);
+  font-size: 10px;
+  margin: 0;
+}
+
+.ghost-hunter-name-input {
+  background: var(--grave-darker);
+  border: 2px solid var(--grave-green-dim);
+  color: var(--grave-green);
+  font-family: inherit;
+  font-size: 16px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  width: 120px;
+  text-transform: uppercase;
+}
+
+.ghost-hunter-name-input:focus {
+  outline: none;
+  border-color: var(--grave-green);
+  box-shadow: 0 0 10px var(--grave-green-glow);
+}
+
+.ghost-hunter-name-input::placeholder {
+  color: var(--grave-green-dim);
+}
+
+.ghost-hunter-no-highscore {
+  color: var(--grave-green-dim);
+  font-size: 10px;
+  margin: 0;
+}
+
+/* Leaderboard */
+.ghost-hunter-leaderboard {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.ghost-hunter-leaderboard h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.ghost-hunter-leaderboard-list {
+  width: 100%;
+  max-width: 280px;
+}
+
+.ghost-hunter-leaderboard table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+.ghost-hunter-leaderboard th {
+  color: var(--grave-green-dim);
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid var(--grave-green-dim);
+  text-align: left;
+}
+
+.ghost-hunter-leaderboard th:first-child {
+  width: 30px;
+  text-align: center;
+}
+
+.ghost-hunter-leaderboard th:last-child {
+  text-align: right;
+}
+
+.ghost-hunter-leaderboard td {
+  color: var(--grave-green);
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid rgba(0, 68, 0, 0.3);
+}
+
+.ghost-hunter-leaderboard td:first-child {
+  text-align: center;
+  color: var(--grave-green-dim);
+}
+
+.ghost-hunter-leaderboard td:last-child {
+  text-align: right;
+}
+
+.ghost-hunter-your-score td {
+  color: var(--grave-green) !important;
+  text-shadow: 0 0 10px var(--grave-green);
+  background: rgba(0, 255, 0, 0.1);
+}
+
+.ghost-hunter-no-scores {
+  color: var(--grave-green-dim);
+  font-size: 10px;
+  padding: 2rem 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ghost-hunter-ghost,
+  .ghost-hunter-ghost-svg,
+  .ghost-hunter-keeper {
+    animation: none;
+  }
+  
+  .ghost-hunter-new-high,
+  .ghost-hunter-flash {
+    animation: none;
+  }
+}

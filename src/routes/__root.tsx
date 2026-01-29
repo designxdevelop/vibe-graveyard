@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
 
 import { Header } from '@/components/Header'
@@ -5,6 +6,7 @@ import { GraveyardBackground } from '@/components/GraveyardBackground'
 import { CRTOverlay } from '@/components/CRTOverlay'
 import { PressF } from '@/components/PressF'
 import { HomeRespectsProvider } from '@/components/HomeRespectsContext'
+import { GhostHunterGame } from '@/components/GhostHunterGame'
 
 import appCss from '../styles.css?url'
 
@@ -52,6 +54,8 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+  const [showGame, setShowGame] = useState(false)
+
   return (
     <html lang="en">
       <head>
@@ -67,13 +71,19 @@ function RootComponent() {
             <main>
               <Outlet />
             </main>
-            <footer className="relative z-10 py-8 px-4 text-center readable-xs text-[var(--grave-green-dim)]">
-              <p>GAME OVER - INSERT COIN TO CONTINUE</p>
-              <p className="mt-2 opacity-50">
-              A sarcastic memorial for abandoned projects. No malice intended. Only a gentle roast.
-            </p>
+            <footer className="relative z-10 py-8 px-4 text-center readable-xs">
+              <button 
+                className="insert-coin-btn"
+                onClick={() => setShowGame(true)}
+              >
+                GAME OVER - INSERT COIN TO CONTINUE
+              </button>
+              <p className="mt-2 text-[var(--grave-green)] opacity-70">
+                A sarcastic memorial for abandoned projects. No malice intended. Only a gentle roast.
+              </p>
             </footer>
           </div>
+          {showGame && <GhostHunterGame onClose={() => setShowGame(false)} />}
         </HomeRespectsProvider>
         <Scripts />
       </body>
