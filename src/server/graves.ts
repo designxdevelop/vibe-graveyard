@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { db } from './db'
 import { graves, type Grave, type NewGrave } from './schema'
@@ -97,6 +97,19 @@ export function parseTechStack(grave: Grave): string[] {
     return []
   }
 }
+
+// Pay respects to a grave (increment respect count)
+export const payRespects = createServerFn({ method: 'POST' })
+  .inputValidator((id: string) => id)
+  .handler(async ({ data: id }) => {
+    const result = await db
+      .update(graves)
+      .set({ respectCount: sql`${graves.respectCount} + 1` })
+      .where(eq(graves.id, id))
+      .returning({ respectCount: graves.respectCount })
+    
+    return { respectCount: result[0]?.respectCount ?? 0 }
+  })
 
 // Fetch GitHub stars from a repo URL
 export const fetchGitHubStars = createServerFn({ method: 'POST' })

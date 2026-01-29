@@ -1,5 +1,6 @@
+import { useState, useEffect, useCallback } from 'react'
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
-import { getGrave, parseTechStack } from '@/server/graves'
+import { getGrave, parseTechStack, payRespects } from '@/server/graves'
 
 export const Route = createFileRoute('/grave/$id')({
   component: GraveDetailPage,
@@ -23,9 +24,19 @@ export const Route = createFileRoute('/grave/$id')({
   ),
 })
 
+interface FloatingF {
+  id: number
+  x: number
+  y: number
+}
+
 function GraveDetailPage() {
   const grave = Route.useLoaderData()
   const techStack = parseTechStack(grave)
+  
+  const [respectCount, setRespectCount] = useState(grave.respectCount ?? 0)
+  const [floatingFs, setFloatingFs] = useState<FloatingF[]>([])
+  const [isPressed, setIsPressed] = useState(false)
 
   // Calculate time dead
   const deathDate = new Date(grave.deathDate)
@@ -38,15 +49,74 @@ function GraveDetailPage() {
     (deathDate.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24)
   )
 
+  const handlePayRespects = useCallback(async (clientX?: number, clientY?: number) => {
+    // Optimistic update
+    setRespectCount(prev => prev + 1)
+    setIsPressed(true)
+    
+    // Create floating F
+    const id = Date.now()
+    const x = clientX ?? window.innerWidth / 2
+    const y = clientY ?? window.innerHeight / 2
+    setFloatingFs(prev => [...prev, { id, x, y }])
+    
+    // Remove floating F after animation
+    setTimeout(() => {
+      setFloatingFs(prev => prev.filter(f => f.id !== id))
+    }, 1000)
+    
+    // Reset pressed state
+    setTimeout(() => setIsPressed(false), 150)
+    
+    // Persist to database
+    try {
+      const result = await payRespects({ data: grave.id })
+      setRespectCount(result.respectCount)
+    } catch (err) {
+      // Revert on error
+      setRespectCount(prev => prev - 1)
+    }
+  }, [grave.id])
+
+  // Keyboard listener for F key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'f' && !e.repeat &&
+          !(e.target instanceof HTMLInputElement) &&
+          !(e.target instanceof HTMLTextAreaElement)) {
+        handlePayRespects()
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handlePayRespects])
+
   const shareText = encodeURIComponent(
     `RIP ${grave.name} (${grave.birthDate} - ${grave.deathDate}). ${grave.causeOfDeath}. F to pay respects. #VibeGraveyard`
   )
 
   return (
+    <>
+      {/* Floating F animations */}
+      {floatingFs.map(f => (
+        <div
+          key={f.id}
+          className="press-f-float pointer-events-none fixed z-50 text-2xl glow-text"
+          style={{
+            left: f.x,
+            top: f.y,
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          F
+        </div>
+      ))}
+      
     <div className="max-w-2xl mx-auto px-4 py-8">
       <Link
         to="/"
-        className="text-[10px] text-[var(--grave-green-dim)] hover:text-[var(--grave-green)] mb-8 inline-block"
+        className="readable-sm text-[var(--grave-green-dim)] hover:text-[var(--grave-green)] mb-8 inline-block transition-colors duration-150 ease"
       >
         ← BACK TO GRAVEYARD
       </Link>
@@ -88,21 +158,27 @@ function GraveDetailPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 text-center py-4 border-t border-[var(--grave-green-dim)]">
+        <div className="grid grid-cols-4 gap-4 text-center py-4 border-t border-[var(--grave-green-dim)]">
           <div>
-            <div className="text-lg glow-text">{grave.starCount || '?'}</div>
-            <div className="text-[8px] text-[var(--grave-green-dim)]">STARS</div>
+            <div className="text-lg glow-text tabular-nums">{grave.starCount?.toLocaleString() || '?'}</div>
+            <div className="readable-xs text-[var(--grave-green-dim)]">STARS</div>
           </div>
           <div>
-            <div className="text-lg glow-text">{daysAlive}</div>
-            <div className="text-[8px] text-[var(--grave-green-dim)]">
+            <div className="text-lg glow-text tabular-nums">{daysAlive.toLocaleString()}</div>
+            <div className="readable-xs text-[var(--grave-green-dim)]">
               DAYS ALIVE
             </div>
           </div>
           <div>
-            <div className="text-lg glow-text">{daysDead}</div>
-            <div className="text-[8px] text-[var(--grave-green-dim)]">
+            <div className="text-lg glow-text tabular-nums">{daysDead.toLocaleString()}</div>
+            <div className="readable-xs text-[var(--grave-green-dim)]">
               DAYS DEAD
+            </div>
+          </div>
+          <div>
+            <div className="text-lg glow-text tabular-nums">{respectCount.toLocaleString()}</div>
+            <div className="readable-xs text-[var(--grave-green-dim)]">
+              RESPECTS
             </div>
           </div>
         </div>
@@ -137,12 +213,43 @@ function GraveDetailPage() {
         </a>
       </div>
 
+      {/* Press F to pay respects */}
+      <div className="mt-8 text-center">
+        <button
+          onClick={(e) => handlePayRespects(e.clientX, e.clientY)}
+          className={`
+            pixel-btn text-[10px] inline-flex items-center gap-3
+            transition-transform duration-150 ease-out
+            ${isPressed ? 'scale-95' : 'scale-100'}
+          `}
+          style={{ touchAction: 'manipulation' }}
+        >
+          <kbd 
+            className={`
+              inline-flex items-center justify-center
+              w-6 h-6 
+              bg-[var(--grave-black)] text-[var(--grave-green)]
+              text-xs font-bold border border-[var(--grave-green)]
+              transition-all duration-150 ease-out
+              ${isPressed ? 'scale-90' : ''}
+            `}
+          >
+            F
+          </kbd>
+          PAY RESPECTS
+        </button>
+        <p className="readable-xs text-[var(--grave-green-dim)] mt-2">
+          Press F or click to pay respects
+        </p>
+      </div>
+
       {/* Submitted by */}
       {grave.submittedBy && (
-        <p className="text-[8px] text-[var(--grave-green-dim)] text-center mt-8">
+        <p className="readable-xs text-[var(--grave-green-dim)] text-center mt-8">
           Submitted by: {grave.submittedBy}
         </p>
       )}
     </div>
+    </>
   )
 }

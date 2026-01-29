@@ -10,6 +10,7 @@ export const graves = sqliteTable('graves', {
   epitaph: text('epitaph').notNull(),
   techStack: text('tech_stack').notNull(), // JSON array stored as string
   starCount: integer('star_count'),
+  respectCount: integer('respect_count').notNull().default(0),
   submittedBy: text('submitted_by'),
   status: text('status', { enum: ['pending', 'approved', 'rejected'] })
     .notNull()
