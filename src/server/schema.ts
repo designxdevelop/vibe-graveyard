@@ -18,5 +18,12 @@ export const graves = sqliteTable('graves', {
   createdAt: text('created_at').notNull(),
 })
 
+export const globalStats = sqliteTable('global_stats', {
+  id: text('id').primaryKey(),
+  respectCount: integer('respect_count').notNull().default(0),
+  updatedAt: text('updated_at').notNull(),
+})
+
 export type Grave = typeof graves.$inferSelect
 export type NewGrave = typeof graves.$inferInsert
+export type GlobalStats = typeof globalStats.$inferSelect

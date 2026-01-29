@@ -33,6 +33,19 @@ sqlite.exec(`
   )
 `)
 
+sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS global_stats (
+    id TEXT PRIMARY KEY,
+    respect_count INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL
+  )
+`)
+
+sqlite.exec(`
+  INSERT OR IGNORE INTO global_stats (id, respect_count, updated_at)
+  VALUES ('global', 0, datetime('now'))
+`)
+
 // Migration: Add respect_count column if it doesn't exist
 try {
   sqlite.exec(`ALTER TABLE graves ADD COLUMN respect_count INTEGER NOT NULL DEFAULT 0`)

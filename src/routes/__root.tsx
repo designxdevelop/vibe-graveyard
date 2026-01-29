@@ -4,6 +4,7 @@ import { Header } from '@/components/Header'
 import { GraveyardBackground } from '@/components/GraveyardBackground'
 import { CRTOverlay } from '@/components/CRTOverlay'
 import { PressF } from '@/components/PressF'
+import { HomeRespectsProvider } from '@/components/HomeRespectsContext'
 
 import appCss from '../styles.css?url'
 
@@ -37,6 +38,17 @@ export const Route = createRootRoute({
     ],
   }),
   component: RootComponent,
+  notFoundComponent: () => (
+    <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+      <h2 className="text-2xl glow-text mb-4">PAGE NOT FOUND</h2>
+      <p className="readable text-[var(--grave-green-dim)] mb-8">
+        This path has been reclaimed by the void. Return to the graveyard.
+      </p>
+      <a href="/" className="pixel-btn readable-sm">
+        RETURN TO GRAVEYARD
+      </a>
+    </div>
+  ),
 })
 
 function RootComponent() {
@@ -48,19 +60,21 @@ function RootComponent() {
       <body className="min-h-screen">
         <GraveyardBackground />
         <CRTOverlay />
-        <PressF />
-        <div className="relative z-10">
-          <Header />
-          <main>
-            <Outlet />
-          </main>
-          <footer className="relative z-10 py-8 px-4 text-center readable-xs text-[var(--grave-green-dim)]">
-            <p>GAME OVER - INSERT COIN TO CONTINUE</p>
-            <p className="mt-2 opacity-50">
-              A sarcastic memorial for abandoned projects. No malice intended.
+        <HomeRespectsProvider>
+          <PressF />
+          <div className="relative z-10">
+            <Header />
+            <main>
+              <Outlet />
+            </main>
+            <footer className="relative z-10 py-8 px-4 text-center readable-xs text-[var(--grave-green-dim)]">
+              <p>GAME OVER - INSERT COIN TO CONTINUE</p>
+              <p className="mt-2 opacity-50">
+              A sarcastic memorial for abandoned projects. No malice intended. Only a gentle roast.
             </p>
-          </footer>
-        </div>
+            </footer>
+          </div>
+        </HomeRespectsProvider>
         <Scripts />
       </body>
     </html>

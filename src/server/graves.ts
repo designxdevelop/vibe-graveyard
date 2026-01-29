@@ -2,7 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { eq, desc, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { db } from './db'
-import { graves, type Grave, type NewGrave } from './schema'
+import { graves, globalStats, type Grave, type NewGrave } from './schema'
 
 // Get all approved graves
 export const getGraves = createServerFn({ method: 'GET' }).handler(async () => {
@@ -12,6 +12,39 @@ export const getGraves = createServerFn({ method: 'GET' }).handler(async () => {
     .where(eq(graves.status, 'approved'))
     .orderBy(desc(graves.createdAt))
 })
+
+export const getGlobalRespects = createServerFn({ method: 'GET' }).handler(async () => {
+  await db
+    .insert(globalStats)
+    .values({ id: 'global', respectCount: 0, updatedAt: new Date().toISOString() })
+    .onConflictDoNothing()
+
+  const result = await db
+    .select({ respectCount: globalStats.respectCount })
+    .from(globalStats)
+    .where(eq(globalStats.id, 'global'))
+
+  return result[0]?.respectCount ?? 0
+})
+
+export const incrementGlobalRespects = createServerFn({ method: 'POST' })
+  .handler(async () => {
+    await db
+      .insert(globalStats)
+      .values({ id: 'global', respectCount: 0, updatedAt: new Date().toISOString() })
+      .onConflictDoNothing()
+
+    const result = await db
+      .update(globalStats)
+      .set({
+        respectCount: sql`${globalStats.respectCount} + 1`,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(globalStats.id, 'global'))
+      .returning({ respectCount: globalStats.respectCount })
+
+    return { respectCount: result[0]?.respectCount ?? 0 }
+  })
 
 // Get a single grave by ID
 export const getGrave = createServerFn({ method: 'GET' })

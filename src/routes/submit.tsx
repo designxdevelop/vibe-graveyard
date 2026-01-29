@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { submitGrave, fetchGitHubStars } from '@/server/graves'
+import epitaphs from '@/data/epitaphs.json'
 
 const CAUSES_OF_DEATH = [
   'Died of AI hype',
@@ -48,7 +49,6 @@ export const Route = createFileRoute('/submit')({
 })
 
 function SubmitPage() {
-  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -99,6 +99,14 @@ function SubmitPage() {
     }))
   }
 
+  const handleRandomEpitaph = () => {
+    if (epitaphs.length === 0) return
+    const options = epitaphs.filter((epitaph) => epitaph !== formData.epitaph)
+    const pool = options.length > 0 ? options : epitaphs
+    const randomEpitaph = pool[Math.floor(Math.random() * pool.length)]
+    setFormData((prev) => ({ ...prev, epitaph: randomEpitaph }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -145,9 +153,9 @@ function SubmitPage() {
 
   if (submitted) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-20 text-center">
-        <h2 className="text-2xl glow-text mb-4">SUBMISSION RECEIVED</h2>
-        <p className="text-[10px] text-[var(--grave-green-dim)] mb-8 leading-relaxed">
+      <div className="max-w-xl mx-auto px-4 sm:px-6 py-16 sm:py-20 text-center">
+        <h2 className="text-xl sm:text-2xl glow-text mb-4">SUBMISSION RECEIVED</h2>
+        <p className="text-[11px] sm:text-[10px] text-[var(--grave-green-dim)] mb-8 leading-relaxed">
           Your submission has been sent to the undertaker for review. 
           If approved, the project will be laid to rest in our graveyard.
         </p>
@@ -177,15 +185,15 @@ function SubmitPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-8">
+    <div className="max-w-xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
       <div className="text-center mb-8">
-        <h2 className="text-xl glow-text mb-3">SUBMIT A GRAVE</h2>
+        <h2 className="text-lg sm:text-xl glow-text mb-3">SUBMIT A PROJECT</h2>
         <p className="readable text-[var(--grave-green-dim)]">
-          Know of a project that deserves a final resting place?
+          Know a repo that shipped the hype but not the roadmap?
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
         {/* Project Name */}
         <div>
           <label className="block readable-sm mb-2">PROJECT NAME *</label>
@@ -221,7 +229,7 @@ function SubmitPage() {
         </div>
 
         {/* Dates */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block readable-sm mb-2">BIRTH DATE *</label>
             <input
@@ -282,7 +290,16 @@ function SubmitPage() {
 
         {/* Epitaph */}
         <div>
-          <label className="block readable-sm mb-2">EPITAPH *</label>
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <label className="block readable-sm">EPITAPH *</label>
+            <button
+              type="button"
+              onClick={handleRandomEpitaph}
+              className="readable-xs px-3 py-2 border-2 border-[var(--grave-green-dim)] bg-[var(--grave-darker)] text-[var(--grave-green-dim)] hover:text-[var(--grave-green)] transition-colors"
+            >
+              RANDOM EPITAPH
+            </button>
+          </div>
           <textarea
             required
             value={formData.epitaph}
@@ -307,7 +324,7 @@ function SubmitPage() {
                 key={tech}
                 type="button"
                 onClick={() => handleTechToggle(tech)}
-                className={`text-[8px] px-2 py-1 transition-colors ${
+                className={`text-[9px] sm:text-[8px] px-2 py-1.5 transition-colors ${
                   formData.techStack.includes(tech)
                     ? 'bg-[var(--grave-green)] text-[var(--grave-black)]'
                     : 'bg-[var(--grave-green-dim)] text-[var(--grave-green)] hover:bg-[var(--grave-green)] hover:text-[var(--grave-black)]'
