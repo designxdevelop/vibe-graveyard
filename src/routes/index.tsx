@@ -7,8 +7,15 @@ export const Route = createFileRoute('/')({
   loader: async () => await getGraves(),
 })
 
+// Random low number for "tests written" (always abysmally low)
+function getRandomTestsWritten() {
+  const options = [0, 0, 0, 1, 1, 2, 0, 0, 1, 0, 3, 0]
+  return options[Math.floor(Math.random() * options.length)]
+}
+
 function HomePage() {
   const graves = Route.useLoaderData()
+  const testsWritten = getRandomTestsWritten()
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -52,24 +59,24 @@ function HomePage() {
 
       {/* Sarcastic stats section */}
       <div className="mt-16 py-8 border-t-2 border-[var(--grave-green-dim)]">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <div>
-            <div className="text-2xl glow-text">{graves.length}</div>
-            <div className="readable-xs text-[var(--grave-green-dim)]">TOTAL GRAVES</div>
+            <div className="text-3xl glow-text mb-2">{graves.length}</div>
+            <div className="text-sm text-[var(--grave-green)] opacity-70 tracking-wide">TOTAL GRAVES</div>
           </div>
           <div>
-            <div className="text-2xl glow-text">
+            <div className="text-3xl glow-text mb-2">
               {graves.reduce((acc, g) => acc + (g.starCount || 0), 0).toLocaleString()}
             </div>
-            <div className="readable-xs text-[var(--grave-green-dim)]">STARS WASTED</div>
+            <div className="text-sm text-[var(--grave-green)] opacity-70 tracking-wide">STARS WASTED</div>
           </div>
           <div>
-            <div className="text-2xl glow-text">∞</div>
-            <div className="readable-xs text-[var(--grave-green-dim)]">PROMISES BROKEN</div>
+            <div className="text-3xl glow-text mb-2">∞</div>
+            <div className="text-sm text-[var(--grave-green)] opacity-70 tracking-wide">PROMISES BROKEN</div>
           </div>
           <div>
-            <div className="text-2xl glow-text">0</div>
-            <div className="readable-xs text-[var(--grave-green-dim)]">TESTS WRITTEN</div>
+            <div className="text-3xl glow-text mb-2">{testsWritten}</div>
+            <div className="text-sm text-[var(--grave-green)] opacity-70 tracking-wide">TESTS WRITTEN</div>
           </div>
         </div>
       </div>
