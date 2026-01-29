@@ -17,7 +17,7 @@ function HomePage() {
         <h2 className="text-2xl md:text-3xl glow-text mb-4 flicker">
           REST IN PEACE
         </h2>
-        <p className="text-[10px] text-[var(--grave-green-dim)] max-w-xl mx-auto leading-relaxed">
+        <p className="readable text-[var(--grave-green-dim)] max-w-xl mx-auto">
           A memorial for vibe-coded projects shared with great fanfare, 
           then quietly abandoned. Here lie the dreams of weekend hackathons 
           and "I'll maintain this later" promises.
@@ -32,13 +32,13 @@ function HomePage() {
       {graves.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-lg glow-text-dim mb-4">THE GRAVEYARD IS EMPTY</p>
-          <p className="text-[10px] text-[var(--grave-green-dim)]">
+          <p className="readable text-[var(--grave-green-dim)]">
             No projects have been laid to rest yet. Be the first to submit one.
           </p>
         </div>
       ) : (
         <>
-          <div className="text-[8px] text-[var(--grave-green-dim)] mb-4 text-center">
+          <div className="readable-sm text-[var(--grave-green-dim)] mb-4 text-center">
             {graves.length} PROJECT{graves.length !== 1 ? 'S' : ''} INTERRED
           </div>
           
@@ -55,21 +55,21 @@ function HomePage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <div>
             <div className="text-2xl glow-text">{graves.length}</div>
-            <div className="text-[8px] text-[var(--grave-green-dim)]">TOTAL GRAVES</div>
+            <div className="readable-xs text-[var(--grave-green-dim)]">TOTAL GRAVES</div>
           </div>
           <div>
             <div className="text-2xl glow-text">
               {graves.reduce((acc, g) => acc + (g.starCount || 0), 0).toLocaleString()}
             </div>
-            <div className="text-[8px] text-[var(--grave-green-dim)]">STARS WASTED</div>
+            <div className="readable-xs text-[var(--grave-green-dim)]">STARS WASTED</div>
           </div>
           <div>
             <div className="text-2xl glow-text">∞</div>
-            <div className="text-[8px] text-[var(--grave-green-dim)]">PROMISES BROKEN</div>
+            <div className="readable-xs text-[var(--grave-green-dim)]">PROMISES BROKEN</div>
           </div>
           <div>
             <div className="text-2xl glow-text">0</div>
-            <div className="text-[8px] text-[var(--grave-green-dim)]">TESTS WRITTEN</div>
+            <div className="readable-xs text-[var(--grave-green-dim)]">TESTS WRITTEN</div>
           </div>
         </div>
       </div>

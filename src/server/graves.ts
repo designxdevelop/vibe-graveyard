@@ -97,3 +97,42 @@ export function parseTechStack(grave: Grave): string[] {
     return []
   }
 }
+
+// Fetch GitHub stars from a repo URL
+export const fetchGitHubStars = createServerFn({ method: 'POST' })
+  .inputValidator((url: string) => url)
+  .handler(async ({ data: url }) => {
+    // Parse GitHub URL to extract owner/repo
+    const match = url.match(/github\.com\/([^\/]+)\/([^\/]+)/i)
+    if (!match) {
+      return { stars: null, error: 'Not a valid GitHub URL' }
+    }
+
+    const [, owner, repo] = match
+    // Remove .git suffix if present
+    const repoName = repo.replace(/\.git$/, '')
+
+    try {
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repoName}`,
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+            'User-Agent': 'vibe-graveyard',
+          },
+        }
+      )
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return { stars: null, error: 'Repository not found' }
+        }
+        return { stars: null, error: 'Failed to fetch repository data' }
+      }
+
+      const data = await response.json()
+      return { stars: data.stargazers_count, error: null }
+    } catch (err) {
+      return { stars: null, error: 'Failed to connect to GitHub' }
+    }
+  })

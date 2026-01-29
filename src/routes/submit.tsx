@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
-import { submitGrave } from '@/server/graves'
+import { submitGrave, fetchGitHubStars } from '@/server/graves'
 
 const CAUSES_OF_DEATH = [
   'Died of AI hype',
@@ -66,6 +66,29 @@ function SubmitPage() {
     starCount: '',
     submittedBy: '',
   })
+  const [fetchingStars, setFetchingStars] = useState(false)
+  const [starsError, setStarsError] = useState<string | null>(null)
+
+  const handleUrlBlur = async () => {
+    const url = formData.url.trim()
+    if (!url || !url.includes('github.com')) return
+    
+    setFetchingStars(true)
+    setStarsError(null)
+    
+    try {
+      const result = await fetchGitHubStars({ data: url })
+      if (result.stars !== null) {
+        setFormData(prev => ({ ...prev, starCount: result.stars.toString() }))
+      } else if (result.error) {
+        setStarsError(result.error)
+      }
+    } catch (err) {
+      setStarsError('Failed to fetch stars')
+    } finally {
+      setFetchingStars(false)
+    }
+  }
 
   const handleTechToggle = (tech: string) => {
     setFormData((prev) => ({
@@ -156,8 +179,8 @@ function SubmitPage() {
   return (
     <div className="max-w-xl mx-auto px-4 py-8">
       <div className="text-center mb-8">
-        <h2 className="text-xl glow-text mb-2">SUBMIT A GRAVE</h2>
-        <p className="text-[10px] text-[var(--grave-green-dim)]">
+        <h2 className="text-xl glow-text mb-3">SUBMIT A GRAVE</h2>
+        <p className="readable text-[var(--grave-green-dim)]">
           Know of a project that deserves a final resting place?
         </p>
       </div>
@@ -165,7 +188,7 @@ function SubmitPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Project Name */}
         <div>
-          <label className="block text-[10px] mb-2">PROJECT NAME *</label>
+          <label className="block readable-sm mb-2">PROJECT NAME *</label>
           <input
             type="text"
             required
@@ -180,7 +203,7 @@ function SubmitPage() {
 
         {/* URL */}
         <div>
-          <label className="block text-[10px] mb-2">PROJECT URL *</label>
+          <label className="block readable-sm mb-2">PROJECT URL *</label>
           <input
             type="url"
             required
@@ -188,15 +211,19 @@ function SubmitPage() {
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, url: e.target.value }))
             }
+            onBlur={handleUrlBlur}
             placeholder="https://github.com/user/repo"
             className="pixel-input"
           />
+          <p className="readable-xs text-[var(--grave-green-dim)] mt-1">
+            GitHub repos will auto-fetch star count
+          </p>
         </div>
 
         {/* Dates */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-[10px] mb-2">BIRTH DATE *</label>
+            <label className="block readable-sm mb-2">BIRTH DATE *</label>
             <input
               type="date"
               required
@@ -208,7 +235,7 @@ function SubmitPage() {
             />
           </div>
           <div>
-            <label className="block text-[10px] mb-2">DEATH DATE *</label>
+            <label className="block readable-sm mb-2">DEATH DATE *</label>
             <input
               type="date"
               required
@@ -223,7 +250,7 @@ function SubmitPage() {
 
         {/* Cause of Death */}
         <div>
-          <label className="block text-[10px] mb-2">CAUSE OF DEATH *</label>
+          <label className="block readable-sm mb-2">CAUSE OF DEATH *</label>
           <select
             required
             value={formData.causeOfDeath}
@@ -255,7 +282,7 @@ function SubmitPage() {
 
         {/* Epitaph */}
         <div>
-          <label className="block text-[10px] mb-2">EPITAPH *</label>
+          <label className="block readable-sm mb-2">EPITAPH *</label>
           <textarea
             required
             value={formData.epitaph}
@@ -273,7 +300,7 @@ function SubmitPage() {
 
         {/* Tech Stack */}
         <div>
-          <label className="block text-[10px] mb-2">TECH STACK</label>
+          <label className="block readable-sm mb-2">TECH STACK</label>
           <div className="flex flex-wrap gap-2 mb-2">
             {COMMON_TECH.map((tech) => (
               <button
@@ -303,8 +330,8 @@ function SubmitPage() {
 
         {/* Star Count */}
         <div>
-          <label className="block text-[10px] mb-2">
-            GITHUB STARS (OPTIONAL)
+          <label className="block readable-sm mb-2">
+            GITHUB STARS {fetchingStars && '(FETCHING...)'}
           </label>
           <input
             type="number"
@@ -315,12 +342,16 @@ function SubmitPage() {
             }
             placeholder="e.g. 1234"
             className="pixel-input"
+            disabled={fetchingStars}
           />
+          {starsError && (
+            <p className="readable-xs text-[var(--grave-red)] mt-1">{starsError}</p>
+          )}
         </div>
 
         {/* Submitted By */}
         <div>
-          <label className="block text-[10px] mb-2">YOUR NAME (OPTIONAL)</label>
+          <label className="block readable-sm mb-2">YOUR NAME (OPTIONAL)</label>
           <input
             type="text"
             value={formData.submittedBy}

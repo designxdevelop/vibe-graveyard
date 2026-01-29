@@ -35,6 +35,29 @@ body {
   font-family: 'PressStart2P', 'Courier New', monospace;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: unset;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* Readable text class - use for body copy */
+.readable {
+  font-size: 11px;
+  line-height: 2;
+  letter-spacing: 0.5px;
+}
+
+/* Smaller readable text */
+.readable-sm {
+  font-size: 10px;
+  line-height: 1.9;
+  letter-spacing: 0.3px;
+}
+
+/* Extra small but still readable */
+.readable-xs {
+  font-size: 9px;
+  line-height: 1.8;
+  letter-spacing: 0.2px;
 }
 
 /* CRT scanline effect */
