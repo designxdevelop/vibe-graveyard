@@ -35,8 +35,8 @@ body {
   font-family: 'PressStart2P', 'Courier New', monospace;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: unset;
-  font-size: 12px;
-  line-height: 1.8;
+  font-size: clamp(11px, 0.9vw + 8px, 13px);
+  line-height: 1.7;
 }
 
 /* Readable text class - use for body copy */
@@ -93,15 +93,15 @@ body {
 /* Glowing text effect */
 .glow-text {
   text-shadow:
-    0 0 5px var(--grave-green),
-    0 0 10px var(--grave-green),
-    0 0 20px var(--grave-green-dim);
+    0 0 0.3em var(--grave-green),
+    0 0 0.7em var(--grave-green),
+    0 0 1.2em var(--grave-green-dim);
 }
 
 .glow-text-dim {
   text-shadow:
-    0 0 3px var(--grave-green-dim),
-    0 0 6px var(--grave-green-dim);
+    0 0 0.25em var(--grave-green-dim),
+    0 0 0.6em var(--grave-green-dim);
 }
 
 /* Pixel button */
@@ -115,6 +115,13 @@ body {
     inset -2px -2px 0 0 var(--grave-green-dim);
   transition: all 0.1s;
   cursor: pointer;
+}
+
+/* F keycap */
+.f-keycap {
+  background: var(--grave-green);
+  color: var(--grave-black);
+  box-shadow: inset -2px -2px 0 0 var(--grave-green-dim);
 }
 
 .pixel-btn:hover {
@@ -243,16 +250,24 @@ body {
 
 /* Stars background */
 @keyframes twinkle {
-  0%, 100% { opacity: 0.3; }
+  0%, 100% { opacity: 0.2; }
   50% { opacity: 1; }
 }
 
-.star {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: var(--grave-green);
-  animation: twinkle 2s ease-in-out infinite;
+/* Ghost floating animation */
+@keyframes ghostFloat {
+  0%, 100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+  25% {
+    transform: translate(-50%, -50%) translateY(-8px) translateX(4px);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-12px);
+  }
+  75% {
+    transform: translate(-50%, -50%) translateY(-6px) translateX(-4px);
+  }
 }
 
 /* ============================================
@@ -385,6 +400,11 @@ body {
     animation: none;
     opacity: 0.6;
   }
+
+  .ghost-sprite {
+    animation: none;
+    opacity: 0.35;
+  }
   
   .pixel-btn {
     transition: none;
@@ -411,5 +431,23 @@ body {
 @media (pointer: coarse) {
   button, a, input, select, textarea {
     min-height: 44px;
+  }
+}
+
+@media (max-width: 640px) {
+  .glow-text {
+    text-shadow:
+      0 0 0.22em var(--grave-green),
+      0 0 0.5em var(--grave-green-dim);
+  }
+
+  .glow-text-dim {
+    text-shadow: 0 0 0.35em var(--grave-green-dim);
+  }
+
+  .pixel-input,
+  .pixel-select,
+  .pixel-textarea {
+    font-size: 16px;
   }
 }

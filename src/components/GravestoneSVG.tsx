@@ -1,3 +1,4 @@
+import { Github, Star } from 'lucide-react'
 import type { Grave } from '@/server/schema'
 
 interface GravestoneSVGProps {
@@ -7,220 +8,447 @@ interface GravestoneSVGProps {
 }
 
 export function GravestoneSVG({ grave, size = 'small', showRespects = true }: GravestoneSVGProps) {
-  const techStack = JSON.parse(grave.techStack) as string[]
-  
-  // Calculate days since death for "freshness"
   const deathDate = new Date(grave.deathDate)
   const now = new Date()
   const daysDead = Math.floor((now.getTime() - deathDate.getTime()) / (1000 * 60 * 60 * 24))
-  
-  // Determine gravestone style based on age
+
   const isAncient = daysDead > 365 * 2
   const isOld = daysDead > 365
-  
-  // Format dates nicely
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
   }
-  
+
   const isLarge = size === 'large'
-  const viewBox = isLarge ? "0 0 300 400" : "0 0 200 260"
-  
+
+  if (isLarge) {
+    return <LargeGravestone grave={grave} isOld={isOld} isAncient={isAncient} formatDate={formatDate} showRespects={showRespects} />
+  }
+
+  return <SmallGravestone grave={grave} isOld={isOld} isAncient={isAncient} formatDate={formatDate} showRespects={showRespects} />
+}
+
+interface GravestoneInnerProps {
+  grave: Grave
+  isOld: boolean
+  isAncient: boolean
+  formatDate: (dateStr: string) => string
+  showRespects: boolean
+}
+
+function SmallGravestone({ grave, isOld, isAncient, formatDate, showRespects }: GravestoneInnerProps) {
   return (
-    <div className="relative">
-      <svg 
-        viewBox={viewBox}
-        className="w-full h-auto"
-        style={{ filter: isAncient ? 'brightness(0.8)' : undefined }}
+    <div
+      className="gravestone-card"
+      style={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: '3 / 4',
+        filter: isAncient ? 'brightness(0.85)' : undefined,
+      }}
+    >
+      {/* Stone background SVG */}
+      <svg
+        viewBox="0 0 180 240"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+        }}
       >
         <defs>
-          <linearGradient id={`stone-grad-${grave.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#777777" />
-            <stop offset="30%" stopColor="#666666" />
-            <stop offset="70%" stopColor="#555555" />
-            <stop offset="100%" stopColor="#444444" />
+          <linearGradient id={`stone-${grave.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#6a6a6a" />
+            <stop offset="25%" stopColor="#5a5a5a" />
+            <stop offset="75%" stopColor="#4a4a4a" />
+            <stop offset="100%" stopColor="#3a3a3a" />
           </linearGradient>
-          <filter id={`glow-${grave.id}`} x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="2" result="blur"/>
+          <filter id={`glow-${grave.id}`}>
+            <feGaussianBlur stdDeviation="1.5" result="blur" />
             <feMerge>
-              <feMergeNode in="blur"/>
-              <feMergeNode in="SourceGraphic"/>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
         </defs>
-        
-        {isLarge ? (
-          // Large gravestone for detail page
-          <>
-            {/* Base/platform */}
-            <rect x="30" y="340" width="240" height="25" fill="#333333" />
-            <rect x="20" y="355" width="260" height="45" fill="#3d2817" />
-            
-            {/* Main stone body - rounded top */}
-            <path 
-              d="M40 340 L40 80 Q40 30 100 30 L200 30 Q260 30 260 80 L260 340 Z" 
-              fill={`url(#stone-grad-${grave.id})`}
-            />
-            
-            {/* Left highlight */}
-            <path 
-              d="M40 340 L40 80 Q40 35 90 32 L95 32 Q50 40 50 85 L50 340 Z" 
-              fill="rgba(255,255,255,0.08)"
-            />
-            
-            {/* Right shadow */}
-            <path 
-              d="M250 340 L250 85 Q250 45 210 35 L215 32 Q260 35 260 80 L260 340 Z" 
-              fill="rgba(0,0,0,0.15)"
-            />
-            
-            {/* Decorative border */}
-            <path 
-              d="M55 325 L55 90 Q55 50 105 50 L195 50 Q245 50 245 90 L245 325 Z" 
-              fill="none" 
-              stroke="#00ff00" 
-              strokeWidth="2"
-              opacity="0.3"
-            />
-            
-            {/* Cross at top */}
-            <rect x="140" y="15" width="20" height="40" fill="#00ff00" opacity="0.7" />
-            <rect x="125" y="25" width="50" height="15" fill="#00ff00" opacity="0.7" />
-            
-            {/* Cracks for old graves */}
-            {isOld && (
-              <g opacity="0.5">
-                <path d="M70 120 L80 160 L72 200 L85 240" stroke="#333" strokeWidth="2" fill="none" />
-                <path d="M230 180 L220 220 L228 260 L215 290" stroke="#333" strokeWidth="2" fill="none" />
-              </g>
-            )}
-            
-            {/* Grass */}
-            <rect x="0" y="355" width="300" height="45" fill="#1a4d1a" />
-            <path d="M15 355 L25 340 L35 355" fill="#1a4d1a" />
-            <path d="M60 355 L70 342 L80 355" fill="#1a4d1a" />
-            <path d="M220 355 L230 343 L240 355" fill="#1a4d1a" />
-            <path d="M265 355 L275 341 L285 355" fill="#1a4d1a" />
-          </>
-        ) : (
-          // Small gravestone for grid
-          <>
-            {/* Base */}
-            <rect x="20" y="220" width="160" height="15" fill="#333333" />
-            
-            {/* Main stone body */}
-            <path 
-              d="M25 220 L25 55 Q25 20 60 20 L140 20 Q175 20 175 55 L175 220 Z" 
-              fill={`url(#stone-grad-${grave.id})`}
-            />
-            
-            {/* Highlight */}
-            <path 
-              d="M25 220 L25 55 Q25 25 55 22 L60 22 Q32 28 32 58 L32 220 Z" 
-              fill="rgba(255,255,255,0.08)"
-            />
-            
-            {/* Shadow */}
-            <path 
-              d="M168 220 L168 58 Q168 30 145 24 L148 22 Q175 25 175 55 L175 220 Z" 
-              fill="rgba(0,0,0,0.15)"
-            />
-            
-            {/* Inner border */}
-            <path 
-              d="M38 205 L38 62 Q38 35 68 35 L132 35 Q162 35 162 62 L162 205 Z" 
-              fill="none" 
-              stroke="#00ff00" 
-              strokeWidth="1.5"
-              opacity="0.25"
-            />
-            
-            {/* Cross */}
-            <rect x="92" y="8" width="16" height="28" fill="#00ff00" opacity="0.6" />
-            <rect x="82" y="15" width="36" height="10" fill="#00ff00" opacity="0.6" />
-            
-            {/* Cracks */}
-            {isOld && (
-              <g opacity="0.4">
-                <path d="M50 70 L58 100 L52 130" stroke="#333" strokeWidth="2" fill="none" />
-                <path d="M150 110 L142 140 L148 170" stroke="#333" strokeWidth="2" fill="none" />
-              </g>
-            )}
-            
-            {/* Ground */}
-            <rect x="0" y="230" width="200" height="30" fill="#1a4d1a" />
-            <path d="M15 230 L22 218 L29 230" fill="#1a4d1a" />
-            <path d="M50 230 L57 220 L64 230" fill="#1a4d1a" />
-            <path d="M136 230 L143 219 L150 230" fill="#1a4d1a" />
-            <path d="M171 230 L178 217 L185 230" fill="#1a4d1a" />
-          </>
+
+        {/* Main stone body */}
+        <path
+          d="M20 210 L20 50 Q20 15 50 15 L130 15 Q160 15 160 50 L160 210 Z"
+          fill={`url(#stone-${grave.id})`}
+        />
+
+        {/* Left highlight */}
+        <path
+          d="M20 210 L20 50 Q20 20 45 17 L50 17 Q28 22 28 52 L28 210 Z"
+          fill="rgba(255,255,255,0.06)"
+        />
+
+        {/* Right shadow */}
+        <path
+          d="M152 210 L152 52 Q152 25 135 19 L138 17 Q160 20 160 50 L160 210 Z"
+          fill="rgba(0,0,0,0.12)"
+        />
+
+        {/* Inner border glow */}
+        <path
+          d="M32 198 L32 56 Q32 30 56 30 L124 30 Q148 30 148 56 L148 198 Z"
+          fill="none"
+          stroke="#00ff00"
+          strokeWidth="1"
+          opacity="0.2"
+        />
+
+        {/* Traditional cross - centered inside stone near top */}
+        <g opacity="0.4">
+          {/* Vertical beam */}
+          <rect x="87" y="35" width="6" height="35" fill="#00ff00" />
+          {/* Horizontal crossbar */}
+          <rect x="78" y="42" width="24" height="5" fill="#00ff00" />
+        </g>
+
+        {/* Cracks for old graves */}
+        {isOld && (
+          <g opacity="0.35">
+            <path d="M45 65 L52 95 L47 125 L55 150" stroke="#333" strokeWidth="1.5" fill="none" />
+            <path d="M138 100 L130 130 L136 160 L128 185" stroke="#333" strokeWidth="1.5" fill="none" />
+          </g>
         )}
+
+        {/* Base platform */}
+        <rect x="15" y="210" width="150" height="10" fill="#444444" />
+
+        {/* Ground/grass */}
+        <rect x="0" y="218" width="180" height="22" fill="#1a4d1a" />
+        <path d="M12 218 L18 208 L24 218" fill="#1a4d1a" />
+        <path d="M45 218 L51 210 L57 218" fill="#1a4d1a" />
+        <path d="M123 218 L129 209 L135 218" fill="#1a4d1a" />
+        <path d="M156 218 L162 207 L168 218" fill="#1a4d1a" />
       </svg>
-      
-      {/* Text overlay */}
-      <div className={`absolute inset-0 flex flex-col items-center ${isLarge ? 'pt-[18%] px-12' : 'pt-[18%] px-8'} text-center`}>
-        {/* R.I.P. */}
-        <div className={`tracking-[0.4em] mb-1 opacity-50 ${isLarge ? 'text-sm' : 'text-[10px]'}`}>
-          R.I.P.
-        </div>
-        
-        {/* Project name */}
-        <h3 className={`glow-text mb-2 leading-tight break-words max-w-full font-bold ${isLarge ? 'text-2xl' : 'text-sm'}`}>
+
+      {/* Text content overlay - starts well below cross area */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '38%',
+          left: '12%',
+          right: '12%',
+          bottom: '12%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Project name - primary hierarchy */}
+        <h3
+          className="glow-text"
+          style={{
+            fontSize: '11px',
+            fontWeight: 'bold',
+            lineHeight: 1.3,
+            marginBottom: '6px',
+            wordBreak: 'break-word',
+            maxWidth: '100%',
+          }}
+        >
           {grave.name}
         </h3>
-        
-        {/* Dates */}
-        <div className={`opacity-60 mb-2 tabular-nums ${isLarge ? 'text-sm' : 'text-[9px]'}`}>
-          {formatDate(grave.birthDate)}
-          <br />
-          —
-          <br />
-          {formatDate(grave.deathDate)}
+
+        {/* Dates - compact */}
+        <div
+          style={{
+            fontSize: '7px',
+            opacity: 0.55,
+            marginBottom: '6px',
+            lineHeight: 1.4,
+          }}
+        >
+          <span className="tabular-nums">{formatDate(grave.birthDate)}</span>
+          <span style={{ margin: '0 3px', opacity: 0.5 }}>–</span>
+          <span className="tabular-nums">{formatDate(grave.deathDate)}</span>
         </div>
-        
-        {/* Divider */}
-        <div className={`bg-[var(--grave-green)] opacity-30 mb-2 ${isLarge ? 'w-24 h-[2px]' : 'w-12 h-[1px]'}`} />
-        
+
         {/* Epitaph */}
-        <p className={`italic opacity-50 leading-relaxed px-2 ${isLarge ? 'text-sm mb-4' : 'text-[9px] line-clamp-2 mb-2'}`}>
+        <p
+          style={{
+            fontSize: '7px',
+            fontStyle: 'italic',
+            opacity: 0.45,
+            lineHeight: 1.4,
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            textWrap: 'balance',
+          }}
+        >
           "{grave.epitaph}"
         </p>
-        
-        {/* Tech stack pills */}
-        <div className={`flex flex-wrap gap-1 justify-center ${isLarge ? 'mb-6' : 'mb-2'}`}>
-          {techStack.slice(0, isLarge ? 6 : 2).map((tech) => (
-            <span
-              key={tech}
-              className={`bg-[var(--grave-green)] text-[var(--grave-black)] font-bold ${isLarge ? 'text-xs px-3 py-1' : 'text-[8px] px-2 py-0.5'}`}
+
+        {/* Spacer */}
+        <div style={{ flex: 1 }} />
+
+        {/* Stats badges */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            marginTop: 'auto',
+          }}
+        >
+          {grave.starCount && grave.starCount > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px',
+                fontSize: '7px',
+                opacity: 0.7,
+              }}
             >
-              {tech}
-            </span>
-          ))}
-          {!isLarge && techStack.length > 2 && (
-            <span className="text-[8px] px-2 py-0.5 opacity-50">
-              +{techStack.length - 2}
-            </span>
+              <Star size={9} fill="#00ff00" color="#00ff00" />
+              <span className="tabular-nums">{grave.starCount.toLocaleString()}</span>
+            </div>
+          )}
+
+          {showRespects && grave.respectCount != null && grave.respectCount > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '8px',
+                opacity: 0.7,
+              }}
+            >
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '12px',
+                  height: '12px',
+                  fontSize: '7px',
+                  fontWeight: 'bold',
+                  backgroundColor: '#00ff00',
+                  color: '#0a0a0a',
+                }}
+              >
+                F
+              </span>
+              <span className="tabular-nums">{grave.respectCount.toLocaleString()}</span>
+            </div>
           )}
         </div>
       </div>
-      
-      {/* Badges at bottom of stone, above grass */}
-      <div className={`absolute ${isLarge ? 'bottom-[18%]' : 'bottom-[20%]'} left-0 right-0 flex justify-center gap-4`}>
-        {/* Star count */}
-        {grave.starCount && grave.starCount > 0 && (
-          <div className={`${isLarge ? 'text-sm' : 'text-[9px]'} opacity-70 flex items-center gap-1`}>
-            <span className="text-yellow-400">★</span>
-            <span className="tabular-nums">{grave.starCount.toLocaleString()}</span>
-          </div>
+    </div>
+  )
+}
+
+function LargeGravestone({ grave, isOld, isAncient, formatDate, showRespects }: GravestoneInnerProps) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: '320px',
+        aspectRatio: '3 / 4',
+        filter: isAncient ? 'brightness(0.85)' : undefined,
+      }}
+    >
+      {/* Stone background SVG */}
+      <svg
+        viewBox="0 0 240 320"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        <defs>
+          <linearGradient id={`stone-lg-${grave.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#707070" />
+            <stop offset="30%" stopColor="#5d5d5d" />
+            <stop offset="70%" stopColor="#4d4d4d" />
+            <stop offset="100%" stopColor="#3d3d3d" />
+          </linearGradient>
+        </defs>
+
+        {/* Main stone body */}
+        <path
+          d="M25 280 L25 65 Q25 20 65 20 L175 20 Q215 20 215 65 L215 280 Z"
+          fill={`url(#stone-lg-${grave.id})`}
+        />
+
+        {/* Left highlight */}
+        <path
+          d="M25 280 L25 65 Q25 25 58 22 L65 22 Q35 28 35 68 L35 280 Z"
+          fill="rgba(255,255,255,0.07)"
+        />
+
+        {/* Right shadow */}
+        <path
+          d="M205 280 L205 68 Q205 32 182 24 L185 22 Q215 25 215 65 L215 280 Z"
+          fill="rgba(0,0,0,0.15)"
+        />
+
+        {/* Inner border glow */}
+        <path
+          d="M40 268 L40 72 Q40 38 72 38 L168 38 Q200 38 200 72 L200 268 Z"
+          fill="none"
+          stroke="#00ff00"
+          strokeWidth="1.5"
+          opacity="0.2"
+        />
+
+        {/* Traditional cross - centered inside stone near top */}
+        <g opacity="0.4">
+          {/* Vertical beam */}
+          <rect x="115" y="45" width="10" height="50" fill="#00ff00" />
+          {/* Horizontal crossbar */}
+          <rect x="102" y="55" width="36" height="8" fill="#00ff00" />
+        </g>
+
+        {/* Cracks */}
+        {isOld && (
+          <g opacity="0.4">
+            <path d="M55 90 L65 130 L58 175 L70 210" stroke="#333" strokeWidth="2" fill="none" />
+            <path d="M190 140 L178 180 L185 220 L172 255" stroke="#333" strokeWidth="2" fill="none" />
+          </g>
         )}
-        
-        {/* Respect count */}
-        {showRespects && grave.respectCount && grave.respectCount > 0 && (
-          <div className={`${isLarge ? 'text-sm' : 'text-[9px]'} opacity-70 tabular-nums`}>
-            {grave.respectCount.toLocaleString()} F
-          </div>
-        )}
+
+        {/* Base */}
+        <rect x="18" y="280" width="204" height="14" fill="#444444" />
+
+        {/* Ground */}
+        <rect x="0" y="292" width="240" height="28" fill="#1a4d1a" />
+        <path d="M15 292 L24 278 L33 292" fill="#1a4d1a" />
+        <path d="M55 292 L64 280 L73 292" fill="#1a4d1a" />
+        <path d="M167 292 L176 279 L185 292" fill="#1a4d1a" />
+        <path d="M207 292 L216 277 L225 292" fill="#1a4d1a" />
+      </svg>
+
+      {/* Text content - starts below cross */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '34%',
+          left: '12%',
+          right: '12%',
+          bottom: '14%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Project name */}
+        <h3
+          className="glow-text"
+          style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+            lineHeight: 1.25,
+            marginBottom: '12px',
+            wordBreak: 'break-word',
+            maxWidth: '100%',
+          }}
+        >
+          {grave.name}
+        </h3>
+
+        {/* Dates - single line */}
+        <div
+          style={{
+            fontSize: '11px',
+            opacity: 0.6,
+            marginBottom: '12px',
+          }}
+        >
+          <span className="tabular-nums">{formatDate(grave.birthDate)}</span>
+          <span style={{ margin: '0 8px', opacity: 0.5 }}>–</span>
+          <span className="tabular-nums">{formatDate(grave.deathDate)}</span>
+        </div>
+
+        {/* Epitaph */}
+        <p
+          style={{
+            fontSize: '11px',
+            fontStyle: 'italic',
+            opacity: 0.5,
+            lineHeight: 1.6,
+            marginBottom: '16px',
+            maxWidth: '90%',
+          }}
+        >
+          "{grave.epitaph}"
+        </p>
+
+        {/* Spacer */}
+        <div style={{ flex: 1 }} />
+
+        {/* Stats - horizontal row */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '20px',
+          }}
+        >
+          {grave.starCount && grave.starCount > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '11px',
+                opacity: 0.75,
+              }}
+            >
+              <Github size={14} color="#00ff00" />
+              <span className="tabular-nums">{grave.starCount.toLocaleString()}</span>
+              <span style={{ opacity: 0.6 }}>STARS</span>
+            </div>
+          )}
+
+          {showRespects && grave.respectCount != null && grave.respectCount > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '11px',
+                opacity: 0.75,
+              }}
+            >
+              <span
+                className="f-keycap"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '18px',
+                  height: '18px',
+                  fontSize: '9px',
+                  fontWeight: 'bold',
+                }}
+              >
+                F
+              </span>
+              <span className="tabular-nums">{grave.respectCount.toLocaleString()}</span>
+              <span style={{ opacity: 0.6 }}>RESPECTS</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
