@@ -189,17 +189,16 @@ function SmallGravestone({ grave, isOld, isAncient, formatDate, showRespects }: 
           "{grave.epitaph}"
         </p>
 
-        {/* Spacer */}
-        <div style={{ flex: 1 }} />
+        {/* Spacer - smaller to move badges up */}
+        <div style={{ flex: 0.5 }} />
 
-        {/* Stats badges */}
+        {/* Stats badges - larger */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '10px',
-            marginTop: 'auto',
+            gap: '14px',
           }}
         >
           {grave.starCount && grave.starCount > 0 && (
@@ -207,12 +206,12 @@ function SmallGravestone({ grave, isOld, isAncient, formatDate, showRespects }: 
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '3px',
-                fontSize: '7px',
-                opacity: 0.7,
+                gap: '5px',
+                fontSize: '10px',
+                opacity: 0.8,
               }}
             >
-              <Star size={9} fill="#00ff00" color="#00ff00" />
+              <Star size={13} fill="#00ff00" color="#00ff00" />
               <span className="tabular-nums">{grave.starCount.toLocaleString()}</span>
             </div>
           )}
@@ -222,9 +221,9 @@ function SmallGravestone({ grave, isOld, isAncient, formatDate, showRespects }: 
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '4px',
-                fontSize: '8px',
-                opacity: 0.7,
+                gap: '5px',
+                fontSize: '10px',
+                opacity: 0.8,
               }}
             >
               <span
@@ -232,9 +231,9 @@ function SmallGravestone({ grave, isOld, isAncient, formatDate, showRespects }: 
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: '12px',
-                  height: '12px',
-                  fontSize: '7px',
+                  width: '16px',
+                  height: '16px',
+                  fontSize: '9px',
                   fontWeight: 'bold',
                   backgroundColor: '#00ff00',
                   color: '#0a0a0a',
