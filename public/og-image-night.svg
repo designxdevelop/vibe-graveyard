@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Vibe Graveyard OG - Night">
+  <defs>
+    <linearGradient id="night" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000000"/>
+      <stop offset="70%" stop-color="#071207"/>
+      <stop offset="100%" stop-color="#0a1a0a"/>
+    </linearGradient>
+    <radialGradient id="moon" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#88ff88" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#88ff88" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="crt" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="2" fill="#000" fill-opacity="0.14"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#night)"/>
+  <circle cx="992" cy="124" r="110" fill="url(#moon)"/>
+  <circle cx="992" cy="124" r="38" fill="#9eff9e" fill-opacity="0.35"/>
+
+  <g fill="#00ff00" opacity="0.75">
+    <rect x="96" y="82" width="2" height="2"/><rect x="224" y="60" width="2" height="2"/><rect x="352" y="94" width="2" height="2"/>
+    <rect x="466" y="70" width="2" height="2"/><rect x="582" y="90" width="2" height="2"/><rect x="702" y="68" width="2" height="2"/>
+    <rect x="824" y="88" width="2" height="2"/><rect x="932" y="62" width="2" height="2"/>
+  </g>
+
+  <path d="M0 468 C 140 430, 252 450, 390 430 C 522 410, 660 446, 812 426 C 944 410, 1080 444, 1200 424 L1200 630 L0 630 Z" fill="#0d200d"/>
+  <rect y="530" width="1200" height="100" fill="#1a4d1a"/>
+  <rect y="516" width="1200" height="16" fill="#3d2817"/>
+
+  <g fill="#666">
+    <rect x="140" y="376" width="130" height="140"/><rect x="158" y="336" width="94" height="44"/><rect x="186" y="306" width="38" height="34"/>
+    <rect x="468" y="324" width="260" height="192"/><rect x="506" y="272" width="184" height="56"/><rect x="574" y="228" width="48" height="46"/>
+    <rect x="920" y="396" width="96" height="120"/><rect x="934" y="364" width="68" height="36"/><rect x="948" y="340" width="40" height="24"/>
+  </g>
+  <g fill="#333">
+    <rect x="256" y="376" width="14" height="140"/><rect x="714" y="324" width="14" height="192"/><rect x="1002" y="396" width="14" height="120"/>
+  </g>
+
+  <rect x="160" y="112" width="882" height="234" fill="#020602" stroke="#00ff00" stroke-opacity="0.45" stroke-width="4"/>
+  <text x="601" y="190" text-anchor="middle" font-family="'Courier New', monospace" font-size="84" font-weight="700" letter-spacing="8" fill="#00ff00">VIBE</text>
+  <text x="601" y="274" text-anchor="middle" font-family="'Courier New', monospace" font-size="84" font-weight="700" letter-spacing="6" fill="#00ff00">GRAVEYARD</text>
+  <text x="601" y="318" text-anchor="middle" font-family="'Courier New', monospace" font-size="24" letter-spacing="3" fill="#00aa00">PRESS F TO PAY RESPECTS</text>
+
+  <rect width="1200" height="630" fill="url(#crt)"/>
+</svg>

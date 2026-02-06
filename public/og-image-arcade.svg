@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Vibe Graveyard OG - Arcade">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000000"/>
+      <stop offset="100%" stop-color="#061006"/>
+    </linearGradient>
+    <pattern id="scanlines" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="2" fill="#000" fill-opacity="0.22"/>
+    </pattern>
+    <pattern id="dither" width="6" height="6" patternUnits="userSpaceOnUse">
+      <rect width="6" height="6" fill="transparent"/>
+      <rect x="0" y="0" width="1" height="1" fill="#00ff00" fill-opacity="0.08"/>
+      <rect x="3" y="2" width="1" height="1" fill="#00ff00" fill-opacity="0.08"/>
+      <rect x="5" y="4" width="1" height="1" fill="#00ff00" fill-opacity="0.08"/>
+    </pattern>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#sky)"/>
+  <rect width="1200" height="630" fill="url(#dither)"/>
+
+  <g fill="#00ff00" opacity="0.85">
+    <rect x="110" y="72" width="2" height="2"/><rect x="214" y="88" width="2" height="2"/>
+    <rect x="332" y="62" width="2" height="2"/><rect x="488" y="90" width="2" height="2"/>
+    <rect x="602" y="70" width="2" height="2"/><rect x="734" y="96" width="2" height="2"/>
+    <rect x="842" y="58" width="2" height="2"/><rect x="964" y="80" width="2" height="2"/>
+    <rect x="1082" y="66" width="2" height="2"/>
+  </g>
+
+  <rect x="88" y="86" width="1024" height="320" fill="#050505" stroke="#00ff00" stroke-width="6"/>
+  <rect x="100" y="98" width="1000" height="296" fill="#020402" stroke="#004400" stroke-width="2"/>
+
+  <text x="600" y="196" text-anchor="middle" font-family="'Courier New', monospace" font-size="82" letter-spacing="8" fill="#00ff00" font-weight="700" filter="url(#glow)">VIBE</text>
+  <text x="600" y="286" text-anchor="middle" font-family="'Courier New', monospace" font-size="82" letter-spacing="6" fill="#00ff00" font-weight="700" filter="url(#glow)">GRAVEYARD</text>
+  <text x="600" y="334" text-anchor="middle" font-family="'Courier New', monospace" font-size="26" letter-spacing="4" fill="#00cc00">WHERE ABANDONED PROJECTS REST IN PEACE</text>
+
+  <g fill="#666666">
+    <rect x="166" y="424" width="110" height="126"/><rect x="178" y="390" width="86" height="38"/><rect x="192" y="362" width="58" height="30"/>
+    <rect x="490" y="394" width="210" height="156"/><rect x="516" y="350" width="158" height="48"/><rect x="560" y="314" width="70" height="40"/>
+    <rect x="916" y="438" width="100" height="112"/><rect x="928" y="408" width="76" height="34"/><rect x="942" y="384" width="48" height="26"/>
+  </g>
+  <g fill="#333333">
+    <rect x="262" y="424" width="14" height="126"/><rect x="686" y="394" width="14" height="156"/><rect x="1002" y="438" width="14" height="112"/>
+    <rect x="490" y="542" width="210" height="8"/>
+  </g>
+  <rect x="585" y="286" width="20" height="58" fill="#00ff00"/>
+  <rect x="560" y="308" width="70" height="14" fill="#00ff00"/>
+
+  <rect y="530" width="1200" height="100" fill="#1a4d1a"/>
+  <rect y="516" width="1200" height="16" fill="#3d2817"/>
+
+  <rect width="1200" height="630" fill="url(#scanlines)"/>
+</svg>

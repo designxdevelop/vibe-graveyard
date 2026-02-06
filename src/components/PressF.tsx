@@ -117,7 +117,7 @@ export function PressF({ onRespect }: PressFProps) {
         >
           F
         </kbd>
-        <span className="readable-xs sm:readable-sm text-[var(--grave-green-dim)] group-hover:text-[var(--grave-green)] transition-colors duration-150 ease">
+        <span className="readable-xs sm:readable-sm text-[var(--grave-green-dim)] group-hover:text-[var(--grave-green)] transition-colors duration-150 ease-out">
           PAY RESPECTS
         </span>
         {(showTotalRespects || respectCount > 0) && (
