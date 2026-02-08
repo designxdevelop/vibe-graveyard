@@ -23,6 +23,7 @@ export const Route = createRootRoute({
       { property: 'og:description', content: 'Where abandoned vibe-coded projects rest in peace. F to pay respects.' },
       { property: 'og:type', content: 'website' },
       { property: 'og:image', content: 'https://vibegraveyard.rip/og-image.png' },
+      { property: 'og:image:type', content: 'image/png' },
       { property: 'og:image:width', content: '1200' },
       { property: 'og:image:height', content: '630' },
       // Twitter Card

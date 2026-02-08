@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const publicDir = join(__dirname, '..', 'public')
+const ogSourceDir = join(__dirname, 'assets', 'og')
 
 // Colors
 const BLACK = '#0a0a0a'
@@ -89,23 +90,30 @@ async function generateFavicon() {
   console.log('Generated favicon.png and favicon.ico')
 }
 
-// Create 1200x630 OG image
-async function generateOGImage() {
-  const svgPath = join(publicDir, 'og-image.svg')
-  const svg = readFileSync(svgPath)
+// Create 1200x630 OG images from local SVG source files.
+async function generateOGImages() {
+  const imageNames = [
+    'og-image',
+    'og-image-night',
+    'og-image-terminal',
+    'og-image-arcade',
+  ]
 
-  await sharp(svg)
-    .png()
-    .toFile(join(publicDir, 'og-image.png'))
-    
-  console.log('Generated og-image.png')
+  for (const imageName of imageNames) {
+    const svgPath = join(ogSourceDir, `${imageName}.svg`)
+    const pngPath = join(publicDir, `${imageName}.png`)
+    const svg = readFileSync(svgPath)
+
+    await sharp(svg).png().toFile(pngPath)
+    console.log(`Generated ${imageName}.png`)
+  }
 }
 
 // Run generation
 async function main() {
   try {
     await generateFavicon()
-    await generateOGImage()
+    await generateOGImages()
     console.log('All images generated successfully!')
   } catch (err) {
     console.error('Error generating images:', err)
