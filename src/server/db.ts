@@ -1,63 +1,45 @@
-import Database from 'better-sqlite3'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
+import { drizzle, type DrizzleD1Database } from 'drizzle-orm/d1'
 import * as schema from './schema'
 
-// Use /data for Railway volume in production, local file for dev
-const dbPath = process.env.NODE_ENV === 'production' 
-  ? '/data/graveyard.db' 
-  : './graveyard.db'
+// Type for our Cloudflare env bindings
+interface CloudflareEnv {
+  DB: D1Database
+  ADMIN_PASSWORD?: string
+  [key: string]: unknown
+}
 
-const sqlite = new Database(dbPath)
+/**
+ * Get the Cloudflare env bindings from the current request context.
+ * Nitro sets `globalThis.__env__` on each incoming request in the
+ * cloudflare_module preset (see nitro/dist/presets/cloudflare/runtime/_module-handler.mjs).
+ */
+function getCloudflareEnv(): CloudflareEnv {
+  const env = (globalThis as Record<string, unknown>).__env__ as CloudflareEnv | undefined
+  if (!env) {
+    throw new Error(
+      'Cloudflare env bindings not available. ' +
+      'Make sure you are calling this within a request handler on Cloudflare Workers.'
+    )
+  }
+  return env
+}
 
-// Enable WAL mode for better concurrent read performance
-sqlite.pragma('journal_mode = WAL')
+/**
+ * Get a Drizzle ORM instance backed by Cloudflare D1.
+ * Call this inside each server function handler — D1 bindings are
+ * per-request and cannot be cached as a module-level singleton.
+ */
+export function getDb(): DrizzleD1Database<typeof schema> {
+  const env = getCloudflareEnv()
+  return drizzle(env.DB, { schema })
+}
 
-export const db = drizzle(sqlite, { schema })
-
-// Initialize the database tables if they don't exist
-sqlite.exec(`
-  CREATE TABLE IF NOT EXISTS graves (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    url TEXT NOT NULL,
-    birth_date TEXT NOT NULL,
-    death_date TEXT NOT NULL,
-    cause_of_death TEXT NOT NULL,
-    epitaph TEXT NOT NULL,
-    tech_stack TEXT NOT NULL,
-    star_count INTEGER,
-    respect_count INTEGER NOT NULL DEFAULT 0,
-    submitted_by TEXT,
-    status TEXT NOT NULL DEFAULT 'pending',
-    created_at TEXT NOT NULL
-  )
-`)
-
-sqlite.exec(`
-  CREATE TABLE IF NOT EXISTS global_stats (
-    id TEXT PRIMARY KEY,
-    respect_count INTEGER NOT NULL DEFAULT 0,
-    updated_at TEXT NOT NULL
-  )
-`)
-
-sqlite.exec(`
-  INSERT OR IGNORE INTO global_stats (id, respect_count, updated_at)
-  VALUES ('global', 0, datetime('now'))
-`)
-
-sqlite.exec(`
-  CREATE TABLE IF NOT EXISTS ghost_hunter_scores (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    score INTEGER NOT NULL,
-    created_at TEXT NOT NULL
-  )
-`)
-
-// Migration: Add respect_count column if it doesn't exist
-try {
-  sqlite.exec(`ALTER TABLE graves ADD COLUMN respect_count INTEGER NOT NULL DEFAULT 0`)
-} catch (e) {
-  // Column already exists, ignore error
+/**
+ * Get an environment variable from the Cloudflare env bindings.
+ * Use this instead of process.env for values that need to be
+ * available in the Workers runtime.
+ */
+export function getEnv(key: string): string | undefined {
+  const env = getCloudflareEnv()
+  return env[key] as string | undefined
 }

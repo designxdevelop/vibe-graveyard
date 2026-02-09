@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
+  "name": "vibe-graveyard",
+  "account_id": "443d20e37c03fd9af4ee799444a4569e",
+  "compatibility_date": "2025-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "vibegraveyard.rip/*",
+      "zone_name": "vibegraveyard.rip"
+    },
+    {
+      "pattern": "www.vibegraveyard.rip/*",
+      "zone_name": "vibegraveyard.rip"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "vibe-graveyard-db",
+      "database_id": "b5856e5a-c405-4861-b227-c4e3d53fb44c"
+    }
+  ]
+}

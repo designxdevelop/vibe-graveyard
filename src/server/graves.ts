@@ -1,13 +1,14 @@
 import { createServerFn } from '@tanstack/react-start'
 import { eq, desc, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
-import { db } from './db'
+import { getDb, getEnv } from './db'
 import { graves, globalStats, ghostHunterScores, type Grave, type NewGrave } from './schema'
 
 // Get approved graves with pagination
 export const getGraves = createServerFn({ method: 'GET' })
   .inputValidator((data?: { limit?: number; offset?: number }) => data || {})
   .handler(async ({ data }) => {
+    const db = getDb()
     const limit = data?.limit ?? 6
     const offset = data?.offset ?? 0
 
@@ -33,6 +34,7 @@ export const getGraves = createServerFn({ method: 'GET' })
   })
 
 export const getGlobalRespects = createServerFn({ method: 'GET' }).handler(async () => {
+  const db = getDb()
   await db
     .insert(globalStats)
     .values({ id: 'global', respectCount: 0, updatedAt: new Date().toISOString() })
@@ -48,6 +50,7 @@ export const getGlobalRespects = createServerFn({ method: 'GET' }).handler(async
 
 export const incrementGlobalRespects = createServerFn({ method: 'POST' })
   .handler(async () => {
+    const db = getDb()
     await db
       .insert(globalStats)
       .values({ id: 'global', respectCount: 0, updatedAt: new Date().toISOString() })
@@ -69,6 +72,7 @@ export const incrementGlobalRespects = createServerFn({ method: 'POST' })
 export const getGrave = createServerFn({ method: 'GET' })
   .inputValidator((id: string) => id)
   .handler(async ({ data: id }) => {
+    const db = getDb()
     const result = await db.select().from(graves).where(eq(graves.id, id))
     return result[0] || null
   })
@@ -89,6 +93,7 @@ export const submitGrave = createServerFn({ method: 'POST' })
     }) => data
   )
   .handler(async ({ data }) => {
+    const db = getDb()
     const newGrave: NewGrave = {
       id: nanoid(),
       name: data.name,
@@ -112,9 +117,10 @@ export const submitGrave = createServerFn({ method: 'POST' })
 export const getPendingGraves = createServerFn({ method: 'GET' })
   .inputValidator((password: string) => password)
   .handler(async ({ data: password }) => {
-    if (password !== process.env.ADMIN_PASSWORD) {
+    if (password !== getEnv('ADMIN_PASSWORD')) {
       throw new Error('Unauthorized')
     }
+    const db = getDb()
     return db
       .select()
       .from(graves)
@@ -126,9 +132,10 @@ export const getPendingGraves = createServerFn({ method: 'GET' })
 export const getAllGraves = createServerFn({ method: 'GET' })
   .inputValidator((password: string) => password)
   .handler(async ({ data: password }) => {
-    if (password !== process.env.ADMIN_PASSWORD) {
+    if (password !== getEnv('ADMIN_PASSWORD')) {
       throw new Error('Unauthorized')
     }
+    const db = getDb()
     return db
       .select()
       .from(graves)
@@ -139,10 +146,10 @@ export const getAllGraves = createServerFn({ method: 'GET' })
 export const deleteGrave = createServerFn({ method: 'POST' })
   .inputValidator((data: { id: string; password: string }) => data)
   .handler(async ({ data }) => {
-    if (data.password !== process.env.ADMIN_PASSWORD) {
+    if (data.password !== getEnv('ADMIN_PASSWORD')) {
       throw new Error('Unauthorized')
     }
-    
+    const db = getDb()
     await db.delete(graves).where(eq(graves.id, data.id))
     return { success: true }
   })
@@ -154,10 +161,10 @@ export const moderateGrave = createServerFn({ method: 'POST' })
       data
   )
   .handler(async ({ data }) => {
-    if (data.password !== process.env.ADMIN_PASSWORD) {
+    if (data.password !== getEnv('ADMIN_PASSWORD')) {
       throw new Error('Unauthorized')
     }
-
+    const db = getDb()
     await db
       .update(graves)
       .set({ status: data.status })
@@ -185,10 +192,10 @@ export const updateGrave = createServerFn({ method: 'POST' })
     }) => data
   )
   .handler(async ({ data }) => {
-    if (data.password !== process.env.ADMIN_PASSWORD) {
+    if (data.password !== getEnv('ADMIN_PASSWORD')) {
       throw new Error('Unauthorized')
     }
-
+    const db = getDb()
     const updates: Record<string, unknown> = {}
     if (data.updates.name) updates.name = data.updates.name
     if (data.updates.url) updates.url = data.updates.url
@@ -220,6 +227,7 @@ export function parseTechStack(grave: Grave): string[] {
 export const payRespects = createServerFn({ method: 'POST' })
   .inputValidator((id: string) => id)
   .handler(async ({ data: id }) => {
+    const db = getDb()
     const result = await db
       .update(graves)
       .set({ respectCount: sql`${graves.respectCount} + 1` })
@@ -261,7 +269,7 @@ export const fetchGitHubStars = createServerFn({ method: 'POST' })
         return { stars: null, error: 'Failed to fetch repository data' }
       }
 
-      const data = await response.json()
+      const data = (await response.json()) as { stargazers_count: number }
       return { stars: data.stargazers_count, error: null }
     } catch (err) {
       return { stars: null, error: 'Failed to connect to GitHub' }
@@ -273,6 +281,7 @@ const MAX_LEADERBOARD_ENTRIES = 10
 
 export const getGhostHunterLeaderboard = createServerFn({ method: 'GET' })
   .handler(async () => {
+    const db = getDb()
     const results = await db
       .select()
       .from(ghostHunterScores)
@@ -285,6 +294,7 @@ export const getGhostHunterLeaderboard = createServerFn({ method: 'GET' })
 export const submitGhostHunterScore = createServerFn({ method: 'POST' })
   .inputValidator((data: { name: string; score: number }) => data)
   .handler(async ({ data }) => {
+    const db = getDb()
     // Validate name (1-10 chars, alphanumeric)
     const name = data.name.trim().toUpperCase().slice(0, 10)
     if (!name || !/^[A-Z0-9]+$/.test(name)) {
@@ -344,6 +354,7 @@ export const submitGhostHunterScore = createServerFn({ method: 'POST' })
 export const checkGhostHunterHighScore = createServerFn({ method: 'GET' })
   .inputValidator((score: number) => score)
   .handler(async ({ data: score }) => {
+    const db = getDb()
     const currentScores = await db
       .select()
       .from(ghostHunterScores)
